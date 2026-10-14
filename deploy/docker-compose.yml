@@ -1,0 +1,42 @@
+# Fair Pay web — SPA tĩnh (Vite build) phục vụ bằng nginx official.
+#
+# Giống taxua/wedding: KHÔNG build trên VPS (RAM ít). Build ở máy dev
+# (`npm run deploy`), upload dist/ rồi chạy nginx với bind mount.
+# Traefik có sẵn (v2.11, network web-proxy, certresolver myresolver).
+#
+# nginx.conf mount theo FILE → sửa nó xong phải
+#   docker compose up -d --force-recreate web
+# (bind mount single-file gắn theo inode). Thư mục dist/ thì không cần.
+
+services:
+  web:
+    image: nginx:1.27-alpine
+    container_name: fair-pay-web
+    restart: unless-stopped
+    volumes:
+      - ./dist:/usr/share/nginx/html:ro
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    networks:
+      - web-proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=web-proxy"
+      - "traefik.http.routers.fair-pay-web.entrypoints=websecure"
+      - "traefik.http.routers.fair-pay-web.rule=Host(`fair-pay.thronelab.online`)"
+      - "traefik.http.routers.fair-pay-web.tls.certresolver=myresolver"
+      - "traefik.http.services.fair-pay-web.loadbalancer.server.port=80"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1/health"]
+      interval: 30s
+      timeout: 4s
+      retries: 3
+      start_period: 5s
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "3"
+
+networks:
+  web-proxy:
+    external: true

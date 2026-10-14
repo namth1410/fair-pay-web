@@ -1,0 +1,231 @@
+@import 'tailwindcss';
+@import '@heroui/styles';
+
+/* ─────────────────────────────────────────────────────────────
+   Fair Pay — Monochrome theme (đen/trắng modern)
+   Port 1-1 từ global.css của app (HeroUI Native) sang HeroUI v3 web.
+   Khai báo NGOÀI @layer → luôn thắng biến theme (nằm trong layer `theme`)
+   của @heroui/styles.
+   ───────────────────────────────────────────────────────────── */
+
+:root,
+[data-theme='light'] {
+  color-scheme: light;
+
+  --background: oklch(0.9702 0 0);
+  --foreground: oklch(0.2103 0.0059 285.89);
+
+  --surface: oklch(1 0 0);
+  --surface-foreground: var(--foreground);
+  --surface-secondary: oklch(0.9524 0.0013 286.37);
+  --surface-secondary-foreground: var(--foreground);
+  --surface-tertiary: oklch(0.9373 0.0013 286.37);
+  --surface-tertiary-foreground: var(--foreground);
+
+  --overlay: oklch(1 0 0);
+  --overlay-foreground: var(--foreground);
+  --backdrop: oklch(0% 0 0 / 35%);
+
+  --muted: oklch(0.5517 0.0138 285.94);
+
+  --default: oklch(94% 0.001 286.375);
+  --default-foreground: var(--foreground);
+
+  /* Accent — đen monochrome */
+  --accent: oklch(0.2103 0.0059 285.89);
+  --accent-foreground: oklch(0.9911 0 0);
+
+  --field-background: oklch(1 0 0);
+  --field-foreground: var(--foreground);
+  --field-placeholder: var(--muted);
+  --field-border: oklch(90% 0.004 286.32);
+  --field-border-width: 1px;
+
+  --success: oklch(0.7329 0.1935 150.81);
+  --success-foreground: var(--foreground);
+  --warning: oklch(0.7819 0.1585 72.33);
+  --warning-foreground: var(--foreground);
+  --danger: oklch(0.6532 0.2328 25.74);
+  --danger-foreground: oklch(0.9911 0 0);
+
+  --segment: oklch(1 0 0);
+  --segment-foreground: var(--foreground);
+
+  --border: oklch(90% 0.004 286.32);
+  --separator: oklch(90% 0.004 286.32);
+  --focus: var(--accent);
+  --link: var(--foreground);
+
+  --surface-shadow:
+    0 2px 4px 0 rgba(0, 0, 0, 0.04), 0 1px 2px 0 rgba(0, 0, 0, 0.06),
+    0 0 1px 0 rgba(0, 0, 0, 0.06);
+  --overlay-shadow:
+    0 2px 8px 0 rgba(0, 0, 0, 0.04), 0 -6px 12px 0 rgba(0, 0, 0, 0.02),
+    0 14px 28px 0 rgba(0, 0, 0, 0.08);
+  --field-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.04);
+
+  --radius: 0.625rem;
+
+  /* Màu tiền tệ theo quy ước dấu (xanh = được nhận, đỏ = cần trả) — khớp theme.ts app */
+  --money-positive: #10b981;
+  --money-negative: #e11d48;
+  --brand-dot-from: #000000;
+  --brand-dot-to: #3f3f46;
+}
+
+.dark,
+[data-theme='dark'] {
+  color-scheme: dark;
+
+  --background: oklch(12% 0.005 285.823);
+  --foreground: oklch(0.9911 0 0);
+
+  --surface: oklch(0.2103 0.0059 285.89);
+  --surface-foreground: var(--foreground);
+  --surface-secondary: oklch(0.257 0.0037 286.14);
+  --surface-secondary-foreground: var(--foreground);
+  --surface-tertiary: oklch(0.2721 0.0024 247.91);
+  --surface-tertiary-foreground: var(--foreground);
+
+  --overlay: oklch(0.2103 0.0059 285.89);
+  --overlay-foreground: var(--foreground);
+  --backdrop: oklch(0% 0 0 / 55%);
+
+  --muted: oklch(70.5% 0.015 286.067);
+
+  --default: oklch(27.4% 0.006 286.033);
+  --default-foreground: var(--foreground);
+
+  /* Accent — trắng monochrome */
+  --accent: oklch(0.9911 0 0);
+  --accent-foreground: oklch(0.2103 0.0059 285.89);
+
+  --field-background: oklch(0.2103 0.0059 285.89);
+  --field-foreground: var(--foreground);
+  --field-placeholder: var(--muted);
+  --field-border: oklch(30% 0.006 286.033);
+  --field-border-width: 1px;
+
+  --success: oklch(0.7329 0.1935 150.81);
+  --success-foreground: oklch(0.2103 0.0059 285.89);
+  --warning: oklch(0.8203 0.1388 76.34);
+  --warning-foreground: oklch(0.2103 0.0059 285.89);
+  --danger: oklch(0.594 0.1967 24.63);
+  --danger-foreground: oklch(0.9911 0 0);
+
+  --segment: oklch(0.3964 0.01 285.93);
+  --segment-foreground: var(--foreground);
+
+  --border: oklch(28% 0.006 286.033);
+  --separator: oklch(28% 0.006 286.033);
+  --focus: var(--accent);
+  --link: var(--foreground);
+
+  --surface-shadow: 0 0 0 0 transparent inset;
+  --overlay-shadow: 0 0 1px 0 rgba(255, 255, 255, 0.2) inset;
+  --field-shadow: 0 0 0 0 transparent inset;
+
+  --money-positive: #34d399;
+  --money-negative: #fb7185;
+  --brand-dot-from: #ffffff;
+  --brand-dot-to: #a1a1aa;
+}
+
+@theme inline {
+  --font-sans: 'Be Vietnam Pro', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --color-money-positive: var(--money-positive);
+  --color-money-negative: var(--money-negative);
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Số tiền: chữ số đều nhau để cột tiền thẳng hàng */
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Khối tinh tế cho các "pill" trạng thái số dư */
+.balance-pill-positive {
+  color: var(--money-positive);
+  background: color-mix(in oklab, var(--money-positive) 14%, transparent);
+}
+.balance-pill-negative {
+  color: var(--money-negative);
+  background: color-mix(in oklab, var(--money-negative) 14%, transparent);
+}
+
+/* Hero số dư — vệt sáng chạy chéo (tắt khi giảm chuyển động) */
+@keyframes hero-shine {
+  0% {
+    transform: translateX(-120%) skewX(-18deg);
+  }
+  60%,
+  100% {
+    transform: translateX(260%) skewX(-18deg);
+  }
+}
+.hero-shine {
+  animation: hero-shine 5.5s ease-in-out infinite;
+}
+[data-reduce-motion='true'] .hero-shine {
+  animation: none;
+  display: none;
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.fade-up {
+  animation: fade-up 260ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+[data-reduce-motion='true'] .fade-up {
+  animation: none;
+}
+
+@keyframes pulse-dot {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.45;
+    transform: scale(0.8);
+  }
+}
+.pulse-dot {
+  animation: pulse-dot 1.6s ease-in-out infinite;
+}
+
+/* Ẩn spinner của input number trên một số trình duyệt */
+input[type='number']::-webkit-outer-spin-button,
+input[type='number']::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Vùng an toàn cho thanh điều hướng dưới trên mobile */
+.pb-safe {
+  padding-bottom: max(env(safe-area-inset-bottom), 0px);
+}
