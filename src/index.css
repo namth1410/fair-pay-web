@@ -2,139 +2,166 @@
 @import '@heroui/styles';
 
 /* ─────────────────────────────────────────────────────────────
-   Fair Pay — Monochrome theme (đen/trắng modern)
-   Port 1-1 từ global.css của app (HeroUI Native) sang HeroUI v3 web.
-   Khai báo NGOÀI @layer → luôn thắng biến theme (nằm trong layer `theme`)
-   của @heroui/styles.
+   Fair Pay — giao diện "Hội thoại" (2026-10): kiểu app nhắn tin, xanh lá lấy từ linh vật
+   rồng. Giá trị khớp 1-1 với src/config/theme.ts + global.css của app mobile — đổi màu ở
+   đây thì đổi cả bên app.
+   Khai báo NGOÀI @layer → luôn thắng biến theme (nằm trong layer `theme`) của @heroui/styles.
    ───────────────────────────────────────────────────────────── */
 
 :root,
 [data-theme='light'] {
   color-scheme: light;
 
-  --background: oklch(0.9702 0 0);
-  --foreground: oklch(0.2103 0.0059 285.89);
+  --background: #f5f6f8;
+  --foreground: #12161a;
 
-  --surface: oklch(1 0 0);
+  --surface: #ffffff;
   --surface-foreground: var(--foreground);
-  --surface-secondary: oklch(0.9524 0.0013 286.37);
+  --surface-secondary: #f1f3f5;
   --surface-secondary-foreground: var(--foreground);
-  --surface-tertiary: oklch(0.9373 0.0013 286.37);
+  --surface-tertiary: #e7eaee;
   --surface-tertiary-foreground: var(--foreground);
 
-  --overlay: oklch(1 0 0);
+  --overlay: #ffffff;
   --overlay-foreground: var(--foreground);
-  --backdrop: oklch(0% 0 0 / 35%);
+  --backdrop: rgb(18 22 26 / 0.35);
 
-  --muted: oklch(0.5517 0.0138 285.94);
+  --muted: #5b6470;
 
-  --default: oklch(94% 0.001 286.375);
+  --default: #f1f3f5;
   --default-foreground: var(--foreground);
 
-  /* Accent — đen monochrome */
-  --accent: oklch(0.2103 0.0059 285.89);
-  --accent-foreground: oklch(0.9911 0 0);
+  /* Accent — xanh rồng */
+  --accent: #267a42;
+  --accent-foreground: #ffffff;
 
-  --field-background: oklch(1 0 0);
+  --field-background: #ffffff;
   --field-foreground: var(--foreground);
-  --field-placeholder: var(--muted);
-  --field-border: oklch(90% 0.004 286.32);
+  --field-placeholder: #8a929c;
+  --field-border: #dfe3e8;
   --field-border-width: 1px;
 
-  --success: oklch(0.7329 0.1935 150.81);
-  --success-foreground: var(--foreground);
-  --warning: oklch(0.7819 0.1585 72.33);
-  --warning-foreground: var(--foreground);
-  --danger: oklch(0.6532 0.2328 25.74);
-  --danger-foreground: oklch(0.9911 0 0);
+  --success: #1e7a3c;
+  --success-foreground: #ffffff;
+  --warning: #f59e0b;
+  --warning-foreground: #12161a;
+  --danger: #c2362f;
+  --danger-foreground: #ffffff;
 
-  --segment: oklch(1 0 0);
+  --segment: #ffffff;
   --segment-foreground: var(--foreground);
 
-  --border: oklch(90% 0.004 286.32);
-  --separator: oklch(90% 0.004 286.32);
+  --border: #e7eaee;
+  --separator: #e7eaee;
   --focus: var(--accent);
-  --link: var(--foreground);
+  --link: var(--accent);
 
-  --surface-shadow:
-    0 2px 4px 0 rgba(0, 0, 0, 0.04), 0 1px 2px 0 rgba(0, 0, 0, 0.06),
-    0 0 1px 0 rgba(0, 0, 0, 0.06);
+  --surface-shadow: 0 1px 2px 0 rgb(18 22 26 / 0.04), 0 0 0 1px rgb(18 22 26 / 0.03);
   --overlay-shadow:
-    0 2px 8px 0 rgba(0, 0, 0, 0.04), 0 -6px 12px 0 rgba(0, 0, 0, 0.02),
-    0 14px 28px 0 rgba(0, 0, 0, 0.08);
-  --field-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.04);
+    0 2px 8px 0 rgb(18 22 26 / 0.05), 0 -6px 12px 0 rgb(18 22 26 / 0.02),
+    0 14px 28px 0 rgb(18 22 26 / 0.1);
+  --field-shadow: none;
 
-  --radius: 0.625rem;
+  --radius: 0.75rem;
 
-  /* Màu tiền tệ theo quy ước dấu (xanh = được nhận, đỏ = cần trả) — khớp theme.ts app */
-  --money-positive: #10b981;
-  --money-negative: #e11d48;
-  --brand-dot-from: #000000;
-  --brand-dot-to: #3f3f46;
+  /* Token riêng của Fair Pay (theme.ts của app) */
+  --primary-strong: #1e6b37;
+  --primary-soft: #e3f4e8;
+  --brand-soft: #eaf7ee;
+  --brand-border: #cdefd8;
+  --bubble-mine: #267a42;
+  --on-bubble-mine: #ffffff;
+  --on-bubble-mine-muted: #ddf3e3;
+  --bubble-other: #f1f3f5;
+  --danger-tint: #fdecea;
+  /* Màu tiền theo quy ước dấu (xanh = được nhận, đỏ = cần trả) */
+  --money-positive: #1e7a3c;
+  --money-negative: #c2362f;
+  /* Chấm giữa wordmark Fair·Pay */
+  --brand-dot-from: #267a42;
+  --brand-dot-to: #6cc487;
 }
 
 .dark,
 [data-theme='dark'] {
   color-scheme: dark;
 
-  --background: oklch(12% 0.005 285.823);
-  --foreground: oklch(0.9911 0 0);
+  --background: #0f1214;
+  --foreground: #e8ecef;
 
-  --surface: oklch(0.2103 0.0059 285.89);
+  --surface: #171b1e;
   --surface-foreground: var(--foreground);
-  --surface-secondary: oklch(0.257 0.0037 286.14);
+  --surface-secondary: #1e2428;
   --surface-secondary-foreground: var(--foreground);
-  --surface-tertiary: oklch(0.2721 0.0024 247.91);
+  --surface-tertiary: #262c31;
   --surface-tertiary-foreground: var(--foreground);
 
-  --overlay: oklch(0.2103 0.0059 285.89);
+  --overlay: #171b1e;
   --overlay-foreground: var(--foreground);
-  --backdrop: oklch(0% 0 0 / 55%);
+  --backdrop: rgb(0 0 0 / 0.55);
 
-  --muted: oklch(70.5% 0.015 286.067);
+  --muted: #9aa4ae;
 
-  --default: oklch(27.4% 0.006 286.033);
+  --default: #1e2428;
   --default-foreground: var(--foreground);
 
-  /* Accent — trắng monochrome */
-  --accent: oklch(0.9911 0 0);
-  --accent-foreground: oklch(0.2103 0.0059 285.89);
+  --accent: #5fcb8b;
+  --accent-foreground: #0f1214;
 
-  --field-background: oklch(0.2103 0.0059 285.89);
+  --field-background: #171b1e;
   --field-foreground: var(--foreground);
-  --field-placeholder: var(--muted);
-  --field-border: oklch(30% 0.006 286.033);
+  --field-placeholder: #6f7983;
+  --field-border: #2c3338;
   --field-border-width: 1px;
 
-  --success: oklch(0.7329 0.1935 150.81);
-  --success-foreground: oklch(0.2103 0.0059 285.89);
-  --warning: oklch(0.8203 0.1388 76.34);
-  --warning-foreground: oklch(0.2103 0.0059 285.89);
-  --danger: oklch(0.594 0.1967 24.63);
-  --danger-foreground: oklch(0.9911 0 0);
+  --success: #6fd39a;
+  --success-foreground: #0f1214;
+  --warning: #fbbf24;
+  --warning-foreground: #0f1214;
+  --danger: #ff8a80;
+  --danger-foreground: #0f1214;
 
-  --segment: oklch(0.3964 0.01 285.93);
+  --segment: #262c31;
   --segment-foreground: var(--foreground);
 
-  --border: oklch(28% 0.006 286.033);
-  --separator: oklch(28% 0.006 286.033);
+  --border: #262c31;
+  --separator: #262c31;
   --focus: var(--accent);
-  --link: var(--foreground);
+  --link: var(--accent);
 
-  --surface-shadow: 0 0 0 0 transparent inset;
-  --overlay-shadow: 0 0 1px 0 rgba(255, 255, 255, 0.2) inset;
-  --field-shadow: 0 0 0 0 transparent inset;
+  /* Nền tối: bóng không thấy được → dựa vào viền mảnh, KHÔNG dùng bóng sáng (thành quầng). */
+  --surface-shadow: 0 0 0 1px rgb(255 255 255 / 0.03);
+  --overlay-shadow: 0 0 0 1px rgb(255 255 255 / 0.06), 0 14px 28px 0 rgb(0 0 0 / 0.45);
+  --field-shadow: none;
 
-  --money-positive: #34d399;
-  --money-negative: #fb7185;
-  --brand-dot-from: #ffffff;
-  --brand-dot-to: #a1a1aa;
+  --primary-strong: #7bd9a1;
+  --primary-soft: #16301f;
+  --brand-soft: #13261a;
+  --brand-border: #24543a;
+  --bubble-mine: #22703f;
+  --on-bubble-mine: #ffffff;
+  --on-bubble-mine-muted: #d3eedc;
+  --bubble-other: #1e2428;
+  --danger-tint: #3a1a18;
+  --money-positive: #6fd39a;
+  --money-negative: #ff8a80;
+  --brand-dot-from: #5fcb8b;
+  --brand-dot-to: #2f9e5c;
 }
 
 @theme inline {
-  --font-sans: 'Be Vietnam Pro', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-sans: 'Onest', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --color-money-positive: var(--money-positive);
   --color-money-negative: var(--money-negative);
+  --color-primary-strong: var(--primary-strong);
+  --color-primary-soft: var(--primary-soft);
+  --color-brand-soft: var(--brand-soft);
+  --color-brand-border: var(--brand-border);
+  --color-bubble-mine: var(--bubble-mine);
+  --color-on-bubble-mine: var(--on-bubble-mine);
+  --color-on-bubble-mine-muted: var(--on-bubble-mine-muted);
+  --color-bubble-other: var(--bubble-other);
+  --color-danger-tint: var(--danger-tint);
 }
 
 html,
@@ -158,7 +185,22 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
-/* Khối tinh tế cho các "pill" trạng thái số dư */
+/* Avatar pastel kiểu app nhắn tin — 6 cặp màu, thứ tự khớp pickPastel() của app (seedGradient.ts).
+   Cặp nền/chữ tương phản ≥ 7:1 ở cả 2 theme. */
+.pastel-0 { --pastel-bg: #cdefd8; --pastel-fg: #14532d; }
+.pastel-1 { --pastel-bg: #ffe9a8; --pastel-fg: #6b4e00; }
+.pastel-2 { --pastel-bg: #dce9ff; --pastel-fg: #1d3f7a; }
+.pastel-3 { --pastel-bg: #ffdcd2; --pastel-fg: #7a1e14; }
+.pastel-4 { --pastel-bg: #efe6ff; --pastel-fg: #4a2b8a; }
+.pastel-5 { --pastel-bg: #d7f2f0; --pastel-fg: #0f4f4a; }
+.dark .pastel-0 { --pastel-bg: #1e3b2a; --pastel-fg: #9fe0b5; }
+.dark .pastel-1 { --pastel-bg: #3a3216; --pastel-fg: #f2d675; }
+.dark .pastel-2 { --pastel-bg: #1c2b44; --pastel-fg: #a9c8ff; }
+.dark .pastel-3 { --pastel-bg: #3d211c; --pastel-fg: #ffb4a6; }
+.dark .pastel-4 { --pastel-bg: #2c2342; --pastel-fg: #cdb8ff; }
+.dark .pastel-5 { --pastel-bg: #163533; --pastel-fg: #8edbd3; }
+
+/* Pill trạng thái số dư */
 .balance-pill-positive {
   color: var(--money-positive);
   background: color-mix(in oklab, var(--money-positive) 14%, transparent);
@@ -166,24 +208,6 @@ body {
 .balance-pill-negative {
   color: var(--money-negative);
   background: color-mix(in oklab, var(--money-negative) 14%, transparent);
-}
-
-/* Hero số dư — vệt sáng chạy chéo (tắt khi giảm chuyển động) */
-@keyframes hero-shine {
-  0% {
-    transform: translateX(-120%) skewX(-18deg);
-  }
-  60%,
-  100% {
-    transform: translateX(260%) skewX(-18deg);
-  }
-}
-.hero-shine {
-  animation: hero-shine 5.5s ease-in-out infinite;
-}
-[data-reduce-motion='true'] .hero-shine {
-  animation: none;
-  display: none;
 }
 
 @keyframes fade-up {
@@ -216,6 +240,29 @@ body {
 }
 .pulse-dot {
   animation: pulse-dot 1.6s ease-in-out infinite;
+}
+
+/* Skeleton "Hội thoại": khối bo tròn nhấp nháy nhẹ bằng opacity (khớp Skeleton.tsx của app). */
+@keyframes bone-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+.bone {
+  background: var(--surface-tertiary);
+  animation: bone-pulse 1.6s ease-in-out infinite;
+}
+[data-reduce-motion='true'] .bone {
+  animation: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .bone {
+    animation: none;
+  }
 }
 
 /* Ẩn spinner của input number trên một số trình duyệt */

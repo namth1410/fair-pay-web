@@ -59,6 +59,18 @@ export function pickHeroGradient(seed: string): HeroGradient {
   };
 }
 
+/** Số cặp màu pastel avatar — khớp PASTEL_LIGHT/PASTEL_DARK (6 cặp) trong seedGradient.ts của app. */
+export const PASTEL_COUNT = 6;
+
+/**
+ * Chỉ số màu pastel (0..5) cho avatar kiểu app nhắn tin — cùng thuật toán pickPastel() của app
+ * nên 1 người/nhóm có cùng màu ở app và web. Màu thật nằm ở class .pastel-N trong index.css
+ * (tự đổi theo sáng/tối).
+ */
+export function pastelIndex(seed: string): number {
+  return hashSeed(seed) % PASTEL_COUNT;
+}
+
 export function getInitials(s: string): string {
   const parts = s.trim().split(/\s+/).filter(Boolean);
   if (parts.length === 0) return '?';

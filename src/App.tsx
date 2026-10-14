@@ -71,6 +71,7 @@ const router = createBrowserRouter([
       { path: '/settings', element: <SettingsPage /> },
       { path: '/groups/:groupId', element: <GroupPage /> },
       { path: '/trips/:tripId', element: <TripPage /> },
+      { path: '/trips/:tripId/info', element: <TripPage /> },
       { path: '/trips/:tripId/expenses/new', element: <ExpenseFormPage /> },
       { path: '/trips/:tripId/expenses/:expenseId/edit', element: <ExpenseFormPage /> },
       { path: '/expenses/new', element: <ExpenseFormPage /> },

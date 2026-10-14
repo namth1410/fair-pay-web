@@ -40,7 +40,7 @@ export function GroupSettingsTab({ group }: { group: Group }) {
       <button
         type="button"
         onClick={() => setEditOpen(true)}
-        className="flex w-full items-center gap-3 rounded-2xl border border-border/70 bg-surface p-4 text-left shadow-surface transition-colors hover:border-foreground/20"
+        className="flex w-full items-center gap-3 rounded-2xl border border-border/70 bg-surface p-4 text-left shadow-surface transition-colors hover:border-accent"
       >
         <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-surface-secondary">
           <Pencil className="h-5 w-5 text-foreground" />
@@ -222,7 +222,7 @@ export function GroupEditSheet({
             <p className="text-sm font-medium text-foreground">Ảnh nhóm</p>
             <div className="flex items-center gap-4">
               <div className={draft.kind === 'remove' ? 'opacity-40' : ''}>
-                <Avatar seed={group.id} label={name || group.name} photoUrl={previewUrl} size={draft.kind === 'new' ? 96 : 72} palette="color" />
+                <Avatar seed={group.id} label={name || group.name} photoUrl={previewUrl} size={draft.kind === 'new' ? 96 : 72} />
               </div>
               <div className="min-w-0 text-sm text-muted">
                 {draft.kind === 'new'

@@ -4,13 +4,16 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useBlocker, useNavigate, useParams, useSearchParams } from 'react-router';
 
 import { computeSplits, type SplitMember, SplitEditor, type SplitState } from '../components/expense/SplitEditor';
+import { MemberAvatarPicker } from '../components/expense/MemberAvatarPicker';
 import { AddToField, type PickedTrip } from '../components/expense/TripPicker';
-import { PageHeader } from '../components/layout/PageHeader';
+import { GroupTripsPane } from '../components/group/GroupTripsPane';
+import { ChatLayout } from '../components/layout/ChatLayout';
+import { PageFrame, PageHeader } from '../components/layout/PageHeader';
 import { ConfirmDialog } from '../components/ui/ConfirmDialog';
 import { TextAreaField, TextInputField } from '../components/ui/Field';
 import { MoneyInput } from '../components/ui/MoneyInput';
 import { PageSpinner } from '../components/ui/PageSpinner';
-import { ChipPicker, EmptyState, ErrorBox, Panel } from '../components/ui/Primitives';
+import { EmptyState, ErrorBox, Panel } from '../components/ui/Primitives';
 import {
   createExpense,
   editExpense,
@@ -21,6 +24,7 @@ import {
 import { fetchAllGroupMembers, fetchGroupById, fetchGroupMembers, type GroupMember } from '../services/group.service';
 import { type ExpensePreset, isFullPreset } from '../services/preset.service';
 import { fetchTripById } from '../services/trip.service';
+import { useIsWide } from '../hooks/useMediaQuery';
 import { useAuthStore } from '../stores/auth.store';
 import { useGroupStore } from '../stores/group.store';
 import { getPresetsForContext, usePresetStore } from '../stores/preset.store';
@@ -64,6 +68,9 @@ export default function ExpenseFormPage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const isEdit = !!editId;
+  const wide = useIsWide();
+  // Cột "các chuyến của nhóm" chỉ hiện khi danh sách đã nạp sẵn (đi từ luồng chuyến sang).
+  const tripsListGroupId = useTripStore((s) => s.currentTripsGroupId);
 
   const profileId = useAuthStore((s) => s.profile?.id ?? null);
   const presets = usePresetStore((s) => s.presets);
@@ -446,28 +453,28 @@ export default function ExpenseFormPage() {
 
   if (ctxError) {
     return (
-      <>
-        <PageHeader title={pageTitle} back />
+      <PageFrame header={<PageHeader title={pageTitle} back />}>
         <EmptyState icon={CircleAlert} title={ctxError} />
-      </>
+      </PageFrame>
     );
   }
   if (!needsPicker && !ctx) {
     return (
-      <>
-        <PageHeader title={pageTitle} back />
+      <PageFrame header={<PageHeader title={pageTitle} back />}>
         <PageSpinner label={isEdit ? 'Đang tải khoản chi...' : 'Đang tải chuyến đi...'} />
-      </>
+      </PageFrame>
     );
   }
 
   const imagePreview = image.kind === 'new' ? image.image.previewUrl : image.kind === 'existing' ? image.url : null;
   const tripClosed = ctx?.status === 'closed';
 
-  return (
-    <>
-      <PageHeader title={pageTitle} subtitle={ctx && !needsPicker ? `${ctx.tripName} · ${ctx.groupName}` : undefined} back />
-
+  const formFrame = (
+    <PageFrame
+      header={
+        <PageHeader title={pageTitle} subtitle={ctx && !needsPicker ? `${ctx.tripName} · ${ctx.groupName}` : undefined} back />
+      }
+    >
       <form
         className="space-y-5 pb-8"
         onSubmit={(e) => {
@@ -550,16 +557,16 @@ export default function ExpenseFormPage() {
 
         {contextPresets.length > 0 ? (
           <div>
-            <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-muted">Preset</p>
+            <p className="mb-2 text-[13px] font-bold text-muted">Preset</p>
             <div className="scrollbar-thin -mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
               {contextPresets.map((p) => (
                 <button
                   key={p.id}
                   type="button"
                   onClick={() => applyPreset(p)}
-                  className="flex shrink-0 items-center gap-2 rounded-full border border-border bg-surface px-3.5 py-2 text-sm transition-colors hover:border-foreground/30"
+                  className="flex shrink-0 items-center gap-2 rounded-full border border-border bg-surface px-3.5 py-2 text-sm transition-colors hover:border-accent hover:bg-primary-soft"
                 >
-                  {isFullPreset(p) ? <Zap className="h-3.5 w-3.5 fill-current text-warning" /> : null}
+                  {isFullPreset(p) ? <Zap className="h-3.5 w-3.5 fill-current text-accent" /> : null}
                   <span className="max-w-[160px] truncate font-medium text-foreground">{p.title}</span>
                   <span className="tabular text-muted">{formatVND(p.amount)}</span>
                   {p.trip_id ? <MapPin className="h-3.5 w-3.5 text-muted" /> : null}
@@ -587,7 +594,7 @@ export default function ExpenseFormPage() {
               value={date}
               max={toLocalInput(new Date())}
               onChange={(e) => setDate(e.target.value)}
-              className="h-10 w-full rounded-[var(--field-radius,0.75rem)] border border-field-border bg-field px-3 text-sm text-field-foreground shadow-field outline-none focus:border-foreground/40"
+              className="h-10 w-full rounded-[var(--field-radius,0.75rem)] border border-field-border bg-field px-3 text-sm text-field-foreground shadow-field outline-none focus:border-accent"
             />
             {/* Ô datetime-local hiển thị theo ngôn ngữ trình duyệt (có thể là kiểu Mỹ) → nhắc lại dạng VN. */}
             {!Number.isNaN(new Date(date).getTime()) ? (
@@ -597,20 +604,17 @@ export default function ExpenseFormPage() {
         </Panel>
 
         <Panel className="space-y-3 p-4">
-          <p className="text-sm font-medium text-foreground">Người trả</p>
+          <p className="text-[15px] font-bold text-foreground">Ai trả?</p>
           {formMembers.length === 0 ? (
             <p className="text-sm text-muted">
               {!ctx ? 'Chọn nhóm để xem thành viên' : membersLoading ? 'Đang tải thành viên...' : 'Nhóm chưa có thành viên'}
             </p>
           ) : (
-            <ChipPicker
+            <MemberAvatarPicker
               ariaLabel="Người trả"
-              value={paidBy}
-              onChange={setPaidBy}
-              options={formMembers.map((m) => ({
-                value: m.id,
-                label: m.id === myMemberId ? `${m.name} (bạn)` : m.name,
-              }))}
+              selected={paidBy}
+              onSelect={setPaidBy}
+              options={formMembers.map((m) => ({ key: m.id, label: m.id === myMemberId ? 'Bạn' : m.name, name: m.name }))}
             />
           )}
         </Panel>
@@ -669,6 +673,12 @@ export default function ExpenseFormPage() {
           if (blocker.state === 'blocked') blocker.proceed();
         }}
       />
-    </>
+    </PageFrame>
   );
+
+  // Desktop + đang trong 1 chuyến: giữ cột "các chuyến của nhóm" bên trái như khi xem luồng.
+  if (wide && ctx && !needsPicker && tripsListGroupId === ctx.groupId) {
+    return <ChatLayout list={<GroupTripsPane groupId={ctx.groupId} activeTripId={ctx.tripId} />} main={formFrame} />;
+  }
+  return formFrame;
 }

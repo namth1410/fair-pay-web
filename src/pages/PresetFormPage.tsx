@@ -3,7 +3,8 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useBlocker, useNavigate, useParams } from 'react-router';
 
 import { type SplitMember, SplitEditor, type SplitState } from '../components/expense/SplitEditor';
-import { PageHeader } from '../components/layout/PageHeader';
+import { MemberAvatarPicker } from '../components/expense/MemberAvatarPicker';
+import { PageFrame, PageHeader } from '../components/layout/PageHeader';
 import { ConfirmDialog } from '../components/ui/ConfirmDialog';
 import { TextInputField } from '../components/ui/Field';
 import { MoneyInput } from '../components/ui/MoneyInput';
@@ -229,24 +230,21 @@ export default function PresetFormPage() {
   const pageTitle = isEdit ? 'Sửa preset' : 'Thêm preset';
   if (isEdit && (!presetsLoaded || !hydrated)) {
     return (
-      <>
-        <PageHeader title={pageTitle} back="/presets" />
+      <PageFrame header={<PageHeader title={pageTitle} back="/presets" />}>
         <PageSpinner />
-      </>
+      </PageFrame>
     );
   }
   if (isEdit && !editing) {
     return (
-      <>
-        <PageHeader title={pageTitle} back="/presets" />
+      <PageFrame header={<PageHeader title={pageTitle} back="/presets" />}>
         <p className="py-10 text-center text-sm text-muted">Preset không tồn tại hoặc đã bị xóa.</p>
-      </>
+      </PageFrame>
     );
   }
 
   return (
-    <>
-      <PageHeader title={pageTitle} back="/presets" />
+    <PageFrame header={<PageHeader title={pageTitle} back="/presets" />}>
       <form
         className="space-y-5 pb-8"
         onSubmit={(e) => {
@@ -259,7 +257,7 @@ export default function PresetFormPage() {
           <TextInputField label="Tên preset" value={title} onChange={setTitle} placeholder="VD: Cà phê sáng" maxLength={100} autoFocus={!isEdit} />
           <MoneyInput label="Số tiền (VND)" value={amount} onChange={setAmount} size="lg" />
           <div className="space-y-2">
-            <p className="text-sm font-medium text-foreground">Phạm vi</p>
+            <p className="text-[15px] font-bold text-foreground">Phạm vi</p>
             <ChipPicker
               ariaLabel="Phạm vi preset"
               value={scope}
@@ -274,9 +272,9 @@ export default function PresetFormPage() {
 
         {scope === 'trip' ? (
           <Panel className="space-y-4 p-4">
-            <p className="text-sm font-semibold text-foreground">Áp dụng cho chuyến đi</p>
+            <p className="text-[15px] font-bold text-foreground">Áp dụng cho chuyến đi</p>
             <div className="space-y-2">
-              <p className="text-xs font-medium text-muted">Nhóm</p>
+              <p className="text-[13px] font-bold text-muted">Nhóm</p>
               {groups.length === 0 ? (
                 <p className="text-sm text-muted">Chưa có nhóm — tạo nhóm trước khi gắn preset.</p>
               ) : (
@@ -290,7 +288,7 @@ export default function PresetFormPage() {
             </div>
             {groupId ? (
               <div className="space-y-2">
-                <p className="text-xs font-medium text-muted">Chuyến đi</p>
+                <p className="text-[13px] font-bold text-muted">Chuyến đi</p>
                 {tripsLoading ? (
                   <Spinner size="sm" color="current" className="text-muted" />
                 ) : trips.length === 0 ? (
@@ -311,7 +309,7 @@ export default function PresetFormPage() {
         {scope === 'trip' && tripId ? (
           <Panel className="space-y-4 p-4">
             <div className="flex items-center gap-2">
-              <p className="text-sm font-semibold text-foreground">Pre-fill 1-tap</p>
+              <p className="text-[15px] font-bold text-foreground">Điền sẵn để tạo 1 chạm</p>
               <Pill tone="muted">Tùy chọn</Pill>
             </div>
             <p className="-mt-2 text-xs leading-5 text-muted">
@@ -322,16 +320,16 @@ export default function PresetFormPage() {
             ) : (
               <>
                 <div className="space-y-2">
-                  <p className="text-xs font-medium text-muted">Người trả</p>
-                  <ChipPicker
+                  <p className="text-[13px] font-bold text-muted">Ai trả?</p>
+                  <MemberAvatarPicker
                     ariaLabel="Người trả"
-                    value={paidBy}
-                    onChange={setPaidBy}
-                    options={[{ value: 'none', label: 'Không chọn' }, ...members.map((m) => ({ value: m.id, label: m.display_name }))]}
+                    selected={paidBy === 'none' ? '__none__' : paidBy}
+                    onSelect={(key) => setPaidBy(key === '__none__' ? 'none' : key)}
+                    options={[{ key: '__none__', label: 'Không chọn' }, ...members.map((m) => ({ key: m.id, label: m.display_name }))]}
                   />
                 </div>
                 <div className="space-y-2">
-                  <p className="text-xs font-medium text-muted">Cách chia</p>
+                  <p className="text-[13px] font-bold text-muted">Chia thế nào?</p>
                   <ChipPicker
                     ariaLabel="Cách chia"
                     value={mode}
@@ -385,6 +383,6 @@ export default function PresetFormPage() {
           if (blocker.state === 'blocked') blocker.proceed();
         }}
       />
-    </>
+    </PageFrame>
   );
 }

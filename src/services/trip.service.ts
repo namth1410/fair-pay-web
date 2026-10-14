@@ -259,8 +259,3 @@ export async function unpinTrip(tripId: string): Promise<void> {
   if (error) throw error;
 }
 
-/** Đổi thứ tự 2 pin: [vị trí 0, vị trí 1]. */
-export async function reorderPinnedTrips(orderedTripIds: [string, string]): Promise<void> {
-  const { error } = await supabase.rpc('reorder_pinned_trips', { p_trip_ids: orderedTripIds });
-  if (error) throw error;
-}

@@ -3,7 +3,7 @@ import { ChevronRight, LogOut, MessageSquareHeart, Monitor, Moon, Pencil, Sun } 
 import { type ReactNode, useState } from 'react';
 
 import { FeedbackSheet } from '../components/common/FeedbackSheet';
-import { PageHeader } from '../components/layout/PageHeader';
+import { TabPage } from '../components/layout/LargeTitleHeader';
 import { Avatar } from '../components/ui/Avatar';
 import { ConfirmDialog } from '../components/ui/ConfirmDialog';
 import { TextInputField } from '../components/ui/Field';
@@ -14,7 +14,7 @@ import { useAuthStore } from '../stores/auth.store';
 import { showError, showWarning } from '../utils/toast';
 
 function SectionTitle({ children }: { children: ReactNode }) {
-  return <p className="mb-2 mt-7 px-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-muted">{children}</p>;
+  return <p className="mb-2 mt-6 px-5 text-[13px] font-bold text-muted">{children}</p>;
 }
 
 function SettingSwitch({
@@ -90,17 +90,16 @@ export default function SettingsPage() {
   };
 
   return (
-    <>
-      <PageHeader title="Cài đặt" />
+    <TabPage title="Cài đặt">
 
       <SectionTitle>Hồ sơ</SectionTitle>
-      <Panel className="p-4">
+      <Panel className="mx-4 p-4">
         <div className="flex items-center gap-4">
           <Avatar
             seed={profile?.display_name || user?.email || 'user'}
             label={profile?.display_name}
             photoUrl={profile?.photo_url}
-            size={56}
+            size={60}
           />
           <div className="min-w-0 flex-1">
             <p className="truncate text-base font-semibold text-foreground">{profile?.display_name ?? 'Đang tải...'}</p>
@@ -154,7 +153,7 @@ export default function SettingsPage() {
       </Panel>
 
       <SectionTitle>Tùy chỉnh</SectionTitle>
-      <Panel className="divide-y divide-border">
+      <Panel className="mx-4 divide-y divide-border">
         <div className="px-4 py-3.5">
           <p className="text-sm font-medium text-foreground">Giao diện</p>
           <p className="text-xs text-muted">Đồng bộ với app Android của bạn</p>
@@ -169,7 +168,7 @@ export default function SettingsPage() {
                   aria-checked={active}
                   onClick={() => void toggle('dark_mode', value)}
                   className={`flex flex-col items-center gap-1.5 rounded-xl border px-2 py-3 text-xs font-medium transition-colors ${
-                    active ? 'border-foreground bg-surface-secondary text-foreground' : 'border-border text-muted hover:text-foreground'
+                    active ? 'border-accent bg-primary-soft text-accent' : 'border-border text-muted hover:text-foreground'
                   }`}
                 >
                   <Icon className="h-4 w-4" />
@@ -188,7 +187,7 @@ export default function SettingsPage() {
       </Panel>
 
       <SectionTitle>Thông báo</SectionTitle>
-      <Panel className="divide-y divide-border">
+      <Panel className="mx-4 divide-y divide-border">
         <SettingSwitch
           label="Hoạt động nhóm"
           hint="Khoản chi mới, sửa/xóa, đóng chuyến đi"
@@ -214,19 +213,19 @@ export default function SettingsPage() {
           onChange={(v) => void toggle('notify_smart', v)}
         />
       </Panel>
-      <p className="mt-2 px-1 text-xs leading-5 text-muted">
+      <p className="mx-4 mt-2 px-1 text-xs leading-5 text-muted">
         Thông báo đẩy (khi đóng app) hiện chỉ có trên app Android. Trên web, thông báo mới hiện ngay khi bạn đang mở trang.
       </p>
 
       <SectionTitle>Phản hồi</SectionTitle>
-      <Panel>
+      <Panel className="mx-4">
         <button
           type="button"
           onClick={() => setFeedbackOpen(true)}
           className="flex w-full items-center gap-3 px-4 py-3.5 text-left"
         >
-          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-surface-secondary">
-            <MessageSquareHeart className="h-5 w-5 text-foreground" />
+          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-primary-soft">
+            <MessageSquareHeart className="h-5 w-5 text-accent" />
           </span>
           <span className="min-w-0 flex-1">
             <span className="block text-sm font-medium text-foreground">Gửi góp ý</span>
@@ -236,9 +235,11 @@ export default function SettingsPage() {
         </button>
       </Panel>
 
-      <Button fullWidth variant="danger-soft" className="mt-8" onPress={() => setLogoutOpen(true)}>
+      <div className="mx-4 mt-8">
+      <Button fullWidth variant="danger-soft" onPress={() => setLogoutOpen(true)}>
         <LogOut className="h-4 w-4" /> Đăng xuất
       </Button>
+      </div>
       <p className="mt-4 text-center text-xs text-muted">Fair Pay web · phiên bản {APP_VERSION}</p>
 
       <FeedbackSheet isOpen={feedbackOpen} onOpenChange={setFeedbackOpen} />
@@ -257,6 +258,6 @@ export default function SettingsPage() {
           }
         }}
       />
-    </>
+    </TabPage>
   );
 }

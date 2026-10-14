@@ -1,6 +1,7 @@
-import { Button, Checkbox, Skeleton, Spinner } from '@heroui/react';
+import { Button, Spinner } from '@heroui/react';
 import {
   Bell,
+  Check,
   CheckCheck,
   CircleCheck,
   CircleX,
@@ -19,10 +20,11 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router';
 
 import { InvitationConfirmDialog } from '../components/group/InvitationConfirmDialog';
-import { HeaderIconButton, PageHeader } from '../components/layout/PageHeader';
+import { HeaderIconButton, TabPage } from '../components/layout/LargeTitleHeader';
 import { Avatar } from '../components/ui/Avatar';
 import { ChipPicker, EmptyState } from '../components/ui/Primitives';
 import { Sheet } from '../components/ui/Sheet';
+import { RowsSkeleton } from '../components/ui/Skeleton';
 import { fetchMyPendingInvitations, type MyPendingInvitation } from '../services/group.service';
 import type { Notification } from '../services/notification.service';
 import { useGroupStore } from '../stores/group.store';
@@ -87,47 +89,44 @@ function NotificationRow({
 }) {
   const Icon = iconFor(n.type);
   const unread = !n.read_at;
+  // Kiểu danh sách chat (khớp NotificationRow của app): nền phẳng; chưa đọc = chữ đậm + giờ xanh + chấm xanh.
   return (
-    <li
-      className={`group relative flex items-start gap-3 rounded-2xl px-3 py-3 transition-colors ${
-        unread ? 'bg-surface shadow-surface' : 'hover:bg-surface/60'
-      }`}
-    >
-      <button type="button" onClick={() => onOpen(n)} className="flex min-w-0 flex-1 items-start gap-3 text-left">
-        <span className="relative shrink-0">
+    <li className="group relative flex items-center transition-colors hover:bg-surface-secondary">
+      <button type="button" onClick={() => onOpen(n)} className="flex min-w-0 flex-1 items-center gap-3 self-stretch pl-4 text-left">
+        <span className="relative h-[50px] w-[50px] shrink-0">
           {n.actor_id ? (
-            <Avatar seed={n.actor_id} label={n.actor_name ?? '?'} photoUrl={n.actor_photo_url} size={40} />
+            <Avatar seed={n.actor_id} label={n.actor_name ?? '?'} photoUrl={n.actor_photo_url} size={48} />
           ) : (
-            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-surface-secondary">
-              <Icon className="h-5 w-5 text-foreground" />
+            <span className="flex h-12 w-12 items-center justify-center rounded-full bg-primary-soft text-accent">
+              <Icon className="h-[22px] w-[22px]" />
             </span>
           )}
-          {n.actor_id ? (
-            <span className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full border-2 border-background bg-foreground text-background">
-              <Icon className="h-2.5 w-2.5" />
-            </span>
-          ) : null}
-        </span>
-        <span className="min-w-0 flex-1">
-          <span className={`line-clamp-2 text-sm leading-5 text-foreground ${unread ? 'font-semibold' : ''}`}>{n.title}</span>
-          {n.body ? <span className="line-clamp-2 text-xs text-muted">{n.body}</span> : null}
-          <span className="mt-0.5 block truncate text-xs text-muted">
-            {n.group_name ? `${n.group_name} · ` : ''}
-            {relativeTime(n.created_at)}
+          <span className="absolute -bottom-0.5 -right-0.5 flex h-5 w-5 items-center justify-center rounded-full border border-border bg-surface text-muted">
+            <Icon className="h-3 w-3" />
           </span>
         </span>
+        <span className="flex min-w-0 flex-1 items-center gap-2.5 self-stretch border-b border-border py-[13px] pr-12">
+          <span className="min-w-0 flex-1">
+            <span className={`line-clamp-2 text-[15px] leading-5 ${unread ? 'font-bold text-foreground' : 'text-[color-mix(in_oklab,var(--foreground)_78%,transparent)]'}`}>
+              {n.title}
+            </span>
+            {n.body ? <span className="line-clamp-2 text-xs text-muted">{n.body}</span> : null}
+            <span className="mt-[3px] flex gap-1 text-xs">
+              {n.group_name ? <span className="min-w-0 truncate text-muted">{n.group_name} ·</span> : null}
+              <span className={`shrink-0 ${unread ? 'font-semibold text-accent' : 'text-muted'}`}>{relativeTime(n.created_at)}</span>
+            </span>
+          </span>
+          {unread ? <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-accent" aria-label="Chưa đọc" /> : null}
+        </span>
       </button>
-      <span className="flex shrink-0 items-center gap-1 self-center">
-        {unread ? <span className="h-2 w-2 rounded-full bg-danger" aria-label="Chưa đọc" /> : null}
-        <button
-          type="button"
-          aria-label="Xóa thông báo"
-          onClick={() => onDelete(n)}
-          className="flex h-8 w-8 items-center justify-center rounded-full text-muted opacity-100 transition-opacity hover:bg-surface-secondary hover:text-foreground sm:opacity-0 sm:group-hover:opacity-100 sm:focus:opacity-100"
-        >
-          <Trash2 className="h-4 w-4" />
-        </button>
-      </span>
+      <button
+        type="button"
+        aria-label="Xóa thông báo"
+        onClick={() => onDelete(n)}
+        className="absolute right-2 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-surface text-muted opacity-100 shadow-surface transition-opacity hover:text-danger sm:opacity-0 sm:group-hover:opacity-100 sm:focus:opacity-100"
+      >
+        <Trash2 className="h-4 w-4" />
+      </button>
     </li>
   );
 }
@@ -213,25 +212,22 @@ export default function NotificationsPage() {
         : `${filter.groupIds.length} nhóm`;
 
   return (
-    <>
-      <PageHeader
-        title="Thông báo"
-        right={
-          <HeaderIconButton
-            label="Đánh dấu tất cả đã đọc"
-            disabled={unreadCount === 0}
-            onClick={() => {
-              void markAllRead()
-                .then(() => showSuccess('Đã đánh dấu tất cả đã đọc'))
-                .catch((e) => showError(e));
-            }}
-          >
-            <CheckCheck className="h-5 w-5" />
-          </HeaderIconButton>
-        }
-      />
-
-      <div className="mb-4 flex flex-wrap items-center gap-2">
+    <TabPage
+      title="Thông báo"
+      right={
+        <HeaderIconButton
+          icon={CheckCheck}
+          label="Đánh dấu tất cả đã đọc"
+          disabled={unreadCount === 0}
+          onClick={() => {
+            void markAllRead()
+              .then(() => showSuccess('Đã đánh dấu tất cả đã đọc'))
+              .catch((e) => showError(e));
+          }}
+        />
+      }
+    >
+      <div className="flex flex-wrap items-center gap-2 px-4 pb-2">
         <ChipPicker
           ariaLabel="Lọc thông báo"
           value={filter.scope}
@@ -246,7 +242,7 @@ export default function NotificationsPage() {
           onClick={() => setGroupSheetOpen(true)}
           className={`flex max-w-[60%] items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors ${
             filter.groupIds.length
-              ? 'border-foreground bg-surface-secondary text-foreground'
+              ? 'border-accent bg-primary-soft text-accent'
               : 'border-border text-muted hover:text-foreground'
           }`}
         >
@@ -257,7 +253,7 @@ export default function NotificationsPage() {
           <button
             type="button"
             onClick={() => void setFilter({ groupIds: [] })}
-            className="text-xs font-semibold text-muted hover:text-foreground"
+            className="text-xs font-semibold text-accent hover:underline"
           >
             Bỏ lọc
           </button>
@@ -265,26 +261,22 @@ export default function NotificationsPage() {
       </div>
 
       {isRefreshing && items.length === 0 ? (
-        <div className="space-y-2">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <Skeleton key={i} className="h-[68px] rounded-2xl" />
-          ))}
-        </div>
+        <RowsSkeleton count={8} size={48} minHeight={72} />
       ) : items.length === 0 ? (
         <EmptyState icon={Bell} title="Chưa có thông báo nào" subtitle="Hoạt động trong nhóm sẽ xuất hiện ở đây." />
       ) : (
-        <div className="space-y-5">
+        <div>
           {sections.map(([title, list]) => (
             <section key={title}>
-              <p className="mb-1.5 px-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-muted">{title}</p>
-              <ul className="space-y-1">
+              <p className="px-4 pb-1 pt-4 text-[13px] font-bold text-muted">{title}</p>
+              <ul>
                 {list.map((n) => (
                   <NotificationRow key={n.id} n={n} onOpen={(x) => void open(x)} onDelete={(x) => void remove(x.id)} />
                 ))}
               </ul>
             </section>
           ))}
-          <div ref={sentinelRef} className="flex h-10 items-center justify-center">
+          <div ref={sentinelRef} className="flex h-12 items-center justify-center">
             {isLoadingMore ? <Spinner size="sm" color="current" className="text-muted" /> : null}
             {!hasMore && items.length > 10 ? <span className="text-xs text-muted">Đã hiển thị tất cả</span> : null}
           </div>
@@ -307,31 +299,35 @@ export default function NotificationsPage() {
         {groups.length === 0 ? (
           <p className="py-6 text-center text-sm text-muted">Bạn chưa có nhóm nào.</p>
         ) : (
-          <ul className="divide-y divide-border overflow-hidden rounded-xl border border-border">
+          <ul className="-mx-2">
             {groups.map((g) => {
               const selected = filter.groupIds.includes(g.id);
               return (
                 <li key={g.id}>
-                  <Checkbox
-                    isSelected={selected}
-                    onChange={() =>
+                  <button
+                    type="button"
+                    role="checkbox"
+                    aria-checked={selected}
+                    onClick={() =>
                       void setFilter({
                         groupIds: selected ? filter.groupIds.filter((id) => id !== g.id) : [...filter.groupIds, g.id],
                       })
                     }
-                    className="w-full"
+                    className="flex w-full items-center gap-3 rounded-xl px-2 py-2 text-left transition-colors hover:bg-surface-secondary"
                   >
-                    <Checkbox.Content className="flex w-full cursor-pointer items-center gap-3 bg-surface px-3.5 py-3 hover:bg-surface-secondary">
-                      <Avatar seed={g.id} label={g.name} photoUrl={g.avatar_url} size={36} palette="color" />
-                      <span className="min-w-0 flex-1">
-                        <span className="block truncate text-sm font-semibold text-foreground">{g.name}</span>
-                        <span className="block text-xs text-muted">{g.member_count} thành viên</span>
-                      </span>
-                      <Checkbox.Control>
-                        <Checkbox.Indicator />
-                      </Checkbox.Control>
-                    </Checkbox.Content>
-                  </Checkbox>
+                    <Avatar seed={g.id} label={g.name} photoUrl={g.avatar_url} size={40} />
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-[15px] font-semibold text-foreground">{g.name}</span>
+                      <span className="block text-xs text-muted">{g.member_count} thành viên</span>
+                    </span>
+                    <span
+                      className={`flex h-6 w-6 items-center justify-center rounded-full border-2 ${
+                        selected ? 'border-accent bg-accent text-accent-foreground' : 'border-[color-mix(in_oklab,var(--muted)_60%,transparent)]'
+                      }`}
+                    >
+                      {selected ? <Check className="h-3.5 w-3.5" strokeWidth={3} /> : null}
+                    </span>
+                  </button>
                 </li>
               );
             })}
@@ -340,6 +336,6 @@ export default function NotificationsPage() {
       </Sheet>
 
       <InvitationConfirmDialog invitation={invitation} onClose={() => setInvitation(null)} />
-    </>
+    </TabPage>
   );
 }

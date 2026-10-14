@@ -8,43 +8,43 @@ import { EmptyState } from '../ui/Primitives';
 import { Sheet } from '../ui/Sheet';
 import type { BalanceEntry } from '../../stores/trip.store';
 
-/** Số dư từng người: + được nợ (xanh), - đang nợ (đỏ), 0 cân bằng. */
+function balanceCaption(balance: number): string {
+  if (balance > 0) return 'Được nhận';
+  if (balance < 0) return 'Đang nợ';
+  return 'Cân bằng';
+}
+
+/**
+ * Số dư từng người dạng 1 thẻ danh sách (giao diện "Hội thoại", khớp BalancesTab của app).
+ * Dấu theo quy ước: số dư CÓ DẤU vào <Money showSign> — '+' được nhận, '-' đang nợ, 0 cân bằng.
+ */
 export function BalancesTab({ balances, myMemberId }: { balances: BalanceEntry[]; myMemberId: string | null }) {
   if (balances.length === 0) {
     return <EmptyState icon={Scale} title="Thêm khoản chi để xem số dư" />;
   }
   const sorted = [...balances].sort((a, b) => b.balance - a.balance);
   return (
-    <ul className="space-y-2">
-      {sorted.map((b) => {
-        const tone = b.balance > 0 ? 'positive' : b.balance < 0 ? 'negative' : 'zero';
-        return (
-          <li
-            key={b.memberId}
-            className={`flex items-center gap-3 rounded-2xl border border-border/70 bg-surface p-3 shadow-surface ${
-              tone === 'positive'
-                ? 'border-l-4 border-l-money-positive'
-                : tone === 'negative'
-                  ? 'border-l-4 border-l-money-negative'
-                  : ''
-            }`}
-          >
-            <Avatar seed={b.memberId} label={b.memberName} size={40} />
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-semibold text-foreground">
-                {b.memberName}
-                {b.memberId === myMemberId ? <span className="font-normal text-muted"> (bạn)</span> : null}
-              </p>
-              <p className="text-xs text-muted">{tone === 'positive' ? 'Được nợ' : tone === 'negative' ? 'Đang nợ' : 'Cân bằng'}</p>
-            </div>
-            {tone === 'zero' ? (
-              <span className="text-sm text-muted">—</span>
-            ) : (
-              <Money value={b.balance} showSign tone="auto" size="md" />
-            )}
-          </li>
-        );
-      })}
+    <ul className="rounded-[18px] border border-border bg-surface px-3.5">
+      {sorted.map((b, i) => (
+        <li
+          key={b.memberId}
+          className={`flex min-h-[60px] items-center gap-3 py-2.5 ${i < sorted.length - 1 ? 'border-b border-border' : ''}`}
+        >
+          <Avatar seed={b.memberId} label={b.memberName} size={36} />
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-[15px] font-semibold text-foreground">
+              {b.memberName}
+              {b.memberId === myMemberId ? <span className="font-normal text-muted"> (bạn)</span> : null}
+            </p>
+            <p className="text-xs text-muted">{balanceCaption(b.balance)}</p>
+          </div>
+          {b.balance === 0 ? (
+            <span className="text-sm text-muted">—</span>
+          ) : (
+            <Money value={b.balance} showSign tone="auto" size="md" />
+          )}
+        </li>
+      ))}
     </ul>
   );
 }

@@ -61,7 +61,7 @@ export function MoneyInput({
             onBlur={() => setFocused(false)}
           />
           <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-sm font-medium text-muted">
-            ₫
+            đ
           </span>
         </div>
         <FieldError>{error}</FieldError>

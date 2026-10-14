@@ -32,7 +32,7 @@ export function ChipPicker<T extends string>({
         const selectedCls =
           tone === 'success'
             ? 'border-money-positive bg-[color-mix(in_oklab,var(--money-positive)_12%,transparent)] text-money-positive'
-            : 'border-foreground bg-surface-secondary text-foreground';
+            : 'border-accent bg-primary-soft text-accent';
         return (
           <button
             key={o.value}
@@ -42,7 +42,7 @@ export function ChipPicker<T extends string>({
             disabled={o.disabled}
             onClick={() => onChange(o.value)}
             className={`max-w-full truncate rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors disabled:opacity-40 ${
-              selected ? selectedCls : 'border-border text-muted hover:border-foreground/30 hover:text-foreground'
+              selected ? selectedCls : 'border-border text-muted hover:border-[color-mix(in_oklab,var(--accent)_40%,transparent)] hover:text-foreground'
             }`}
           >
             {o.label}
@@ -125,7 +125,7 @@ export function SegmentedTabs<T extends string>({
       aria-label={ariaLabel}
       onScroll={updateFade}
       style={mask ? { maskImage: mask, WebkitMaskImage: mask } : undefined}
-      className={`scrollbar-none flex gap-1 overflow-x-auto rounded-2xl bg-surface-secondary p-1 ${className}`}
+      className={`scrollbar-none flex gap-1 overflow-x-auto ${className}`}
     >
       {tabs.map((t) => {
         const active = t.id === value;
@@ -136,9 +136,9 @@ export function SegmentedTabs<T extends string>({
             role="tab"
             aria-selected={active}
             onClick={() => onChange(t.id)}
-            className={`relative flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-xl px-3 py-2 text-[13px] font-medium transition-all sm:px-3.5 sm:text-sm ${
+            className={`relative flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-full border px-3.5 py-[7px] text-sm font-semibold transition-colors ${
               stretch ? 'flex-1' : ''
-            } ${active ? 'bg-surface text-foreground shadow-surface' : 'text-muted hover:text-foreground'}`}
+            } ${active ? 'border-accent bg-primary-soft text-accent' : 'border-transparent text-muted hover:bg-surface-secondary hover:text-foreground'}`}
           >
             {t.label}
             {t.badge ? (
@@ -171,11 +171,11 @@ export function EmptyState({
   return (
     <div className={`relative flex flex-col items-center px-6 py-12 text-center ${className}`}>
       <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute left-1/2 top-6 h-40 w-40 -translate-x-1/2 rounded-full bg-[radial-gradient(circle,var(--surface-tertiary),transparent_70%)] opacity-80" />
+        <div className="absolute left-1/2 top-3 h-40 w-40 -translate-x-1/2 rounded-full bg-[radial-gradient(circle,var(--primary-soft)_55%,transparent_72%)]" />
       </div>
       {Icon ? (
-        <div className="relative mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-surface shadow-surface">
-          <Icon className="h-6 w-6 text-muted" strokeWidth={1.75} />
+        <div className="relative mb-5 mt-4 flex h-24 w-24 items-center justify-center">
+          <Icon className="h-11 w-11 text-primary-strong" strokeWidth={1.5} />
         </div>
       ) : null}
       <p className="relative text-base font-semibold text-foreground">{title}</p>
@@ -218,7 +218,7 @@ export function InfoBox({
   return <div className={`rounded-xl px-3 py-2.5 text-sm leading-5 ${cls} ${className}`}>{children}</div>;
 }
 
-// ── SectionLabel: "NHÓM CỦA BẠN  03 ─────" ────────────────────────────────
+// ── SectionLabel: tiêu đề mục kiểu app ("Đề xuất quyết toán (2)") ─────────
 
 export function SectionLabel({
   children,
@@ -232,14 +232,12 @@ export function SectionLabel({
   className?: string;
 }) {
   return (
-    <div className={`flex items-center gap-3 ${className}`}>
-      <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted">{children}</span>
-      {count !== undefined ? (
-        <span className="tabular rounded-md bg-surface-secondary px-1.5 py-0.5 text-[11px] font-semibold text-muted">
-          {String(count).padStart(2, '0')}
-        </span>
-      ) : null}
-      <span className="h-px flex-1 bg-border" />
+    <div className={`flex min-h-8 items-center gap-2 ${className}`}>
+      <span className="text-[13px] font-bold text-muted">
+        {children}
+        {count !== undefined ? <span className="tabular font-semibold"> ({count})</span> : null}
+      </span>
+      <span className="flex-1" />
       {right}
     </div>
   );
@@ -257,7 +255,7 @@ export function Panel({
   as?: 'div' | 'section' | 'li';
 }) {
   return (
-    <Tag className={`rounded-2xl border border-border/70 bg-surface shadow-surface ${className}`}>{children}</Tag>
+    <Tag className={`rounded-[18px] border border-border bg-surface ${className}`}>{children}</Tag>
   );
 }
 
@@ -278,7 +276,7 @@ export function Pill({
     success: 'balance-pill-positive',
     danger: 'balance-pill-negative',
     warning: 'bg-[color-mix(in_oklab,var(--warning)_18%,transparent)] text-[color-mix(in_oklab,var(--warning)_70%,var(--foreground))]',
-    accent: 'bg-foreground text-background',
+    accent: 'bg-accent text-accent-foreground',
   }[tone];
   return (
     <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold leading-4 ${cls} ${className}`}>

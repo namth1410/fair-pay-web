@@ -33,7 +33,7 @@ function ActionCard({
       type="button"
       disabled={disabled}
       onClick={onPress}
-      className="flex w-full items-center gap-3 rounded-2xl border border-border/70 bg-surface p-4 text-left shadow-surface transition-colors enabled:hover:border-foreground/20 disabled:cursor-default"
+      className="flex w-full items-center gap-3 rounded-2xl border border-border/70 bg-surface p-4 text-left shadow-surface transition-colors enabled:hover:border-accent disabled:cursor-default"
     >
       <span
         className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${
@@ -113,7 +113,7 @@ export function ManagementTab({ trip, isAdmin }: { trip: Trip; isAdmin: boolean 
         onPress={() => setDialog('reset')}
       />
 
-      <p className="pt-3 text-[11px] font-semibold uppercase tracking-[0.08em] text-danger">Nguy hiểm</p>
+      <p className="pt-3 text-[13px] font-bold text-danger">Nguy hiểm</p>
       <ActionCard
         icon={<Trash2 className="h-5 w-5" />}
         title="Xóa chuyến đi"

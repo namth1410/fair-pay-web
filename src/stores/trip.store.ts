@@ -25,7 +25,6 @@ import {
   fetchTrips,
   pinTrip,
   reopenTrip,
-  reorderPinnedTrips,
   type Trip,
   type TripWithGroup,
   unpinTrip,
@@ -97,7 +96,6 @@ interface TripState {
 
   loadPinnedTrips: () => Promise<void>;
   togglePin: (tripId: string) => Promise<void>;
-  swapPinned: () => Promise<void>;
   loadAllUserTrips: () => Promise<void>;
 
   reset: () => void;
@@ -320,33 +318,26 @@ export const useTripStore = create<TripState>((set, get) => ({
     if (!isPinned && get().pinnedTripIds.size >= MAX_PINNED_TRIPS) {
       throw new Error('max_pinned_reached');
     }
-    // Optimistic cho checkbox/nút phản hồi ngay.
+    // Optimistic cho checkbox/hàng story phản hồi ngay. Server đưa chuyến mới ghim lên ĐẦU hàng.
     const prevIds = get().pinnedTripIds;
+    const prevTrips = get().pinnedTrips;
     const nextIds = new Set(prevIds);
-    if (isPinned) nextIds.delete(tripId);
-    else nextIds.add(tripId);
-    set({ pinnedTripIds: nextIds });
+    if (isPinned) {
+      nextIds.delete(tripId);
+      set({ pinnedTripIds: nextIds, pinnedTrips: prevTrips.filter((t) => t.id !== tripId) });
+    } else {
+      nextIds.add(tripId);
+      const trip = get().allUserTrips?.find((t) => t.id === tripId);
+      set({ pinnedTripIds: nextIds, ...(trip ? { pinnedTrips: [trip, ...prevTrips] } : {}) });
+    }
     try {
       if (isPinned) await unpinTrip(tripId);
       else await pinTrip(tripId);
     } catch (e) {
-      set({ pinnedTripIds: prevIds });
+      set({ pinnedTripIds: prevIds, pinnedTrips: prevTrips });
       throw e;
     }
     await get().loadPinnedTrips();
-  },
-
-  swapPinned: async () => {
-    const [a, b] = get().pinnedTrips;
-    if (!a || !b) return;
-    const prev = get().pinnedTrips;
-    set({ pinnedTrips: [b, a, ...prev.slice(2)] });
-    try {
-      await reorderPinnedTrips([b.id, a.id]);
-    } catch (e) {
-      set({ pinnedTrips: prev });
-      throw e;
-    }
   },
 
   loadAllUserTrips: async () => {

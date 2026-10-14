@@ -80,14 +80,14 @@ export function ExpenseDetailSheet({
 
             {expense.note ? (
               <section>
-                <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-muted">Ghi chú</p>
+                <p className="mb-1.5 text-[13px] font-bold text-muted">Ghi chú</p>
                 <p className="whitespace-pre-line text-sm leading-6 text-foreground">{expense.note}</p>
               </section>
             ) : null}
 
             {expense.image_url ? (
               <section>
-                <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-muted">Hình ảnh</p>
+                <p className="mb-1.5 text-[13px] font-bold text-muted">Hình ảnh</p>
                 <a href={expense.image_url} target="_blank" rel="noreferrer" className="block overflow-hidden rounded-xl bg-surface-secondary">
                   <img src={expense.image_url} alt={`Ảnh hoá đơn ${expense.title}`} className="aspect-[4/3] w-full object-cover" loading="lazy" />
                 </a>
@@ -96,7 +96,7 @@ export function ExpenseDetailSheet({
 
             <section>
               <div className="mb-2 flex items-center gap-2">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted">Chia tiền</p>
+                <p className="text-[13px] font-bold text-muted">Chia tiền</p>
                 <Pill tone="muted">{SPLIT_LABEL[expense.split_type] ?? expense.split_type}</Pill>
               </div>
               <ul className="divide-y divide-border rounded-xl border border-border">

@@ -63,7 +63,6 @@ export function InvitationConfirmDialog({
                 label={invitation.group_name}
                 photoUrl={invitation.group_avatar_url}
                 size={56}
-                palette="color"
               />
               <p className="text-base font-semibold text-foreground">{invitation.group_name}</p>
               <p className="text-sm text-muted">do {invitation.inviter_name || 'quản trị viên'} mời</p>

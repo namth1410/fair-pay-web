@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Snapshot DOM khi test qua CDP (xem bằng dev server, không commit/deploy)
+public/__snap-*

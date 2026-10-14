@@ -35,7 +35,7 @@ function applyTheme(pref: ThemePref): void {
   root.classList.toggle('light', !dark);
   root.dataset.theme = dark ? 'dark' : 'light';
   const meta = document.querySelector('meta[name="theme-color"]');
-  if (meta) meta.setAttribute('content', dark ? '#0f0f12' : '#f7f7f7');
+  if (meta) meta.setAttribute('content', dark ? '#0f1214' : '#f5f6f8');
   window.dispatchEvent(new CustomEvent('fairpay:theme', { detail: { dark } }));
 
   if (!mediaListenerAttached && window.matchMedia) {
@@ -79,27 +79,6 @@ export function applyCachedPreferences(): void {
 
 export function isDarkNow(): boolean {
   return document.documentElement.classList.contains('dark');
-}
-
-// ── Lựa chọn hiển thị trên Home (per-thiết bị) ─────────────────────────────
-const HOME_VIEW_KEY = 'fair_pay_home_view_mode';
-export type HomeViewMode = 'grid' | 'list';
-
-export function getHomeViewMode(): HomeViewMode {
-  try {
-    const v = localStorage.getItem(HOME_VIEW_KEY);
-    return v === 'list' ? 'list' : 'grid';
-  } catch {
-    return 'grid';
-  }
-}
-
-export function setHomeViewMode(mode: HomeViewMode): void {
-  try {
-    localStorage.setItem(HOME_VIEW_KEY, mode);
-  } catch {
-    /* ignore */
-  }
 }
 
 // ── Cờ đã chào mừng (WelcomeDialog chỉ hiện 1 lần / user / trình duyệt) ────

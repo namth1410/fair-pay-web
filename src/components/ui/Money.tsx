@@ -41,7 +41,7 @@ function toneClass(tone: MoneyTone, value: number): string {
   }
 }
 
-/** Số tiền VND: "150.000₫" với đơn vị nhỏ hơn, chữ số tabular. */
+/** Số tiền VND: "150.000đ" (đơn vị "đ" thường như app) với đơn vị nhỏ hơn, chữ số tabular. */
 export const Money = memo(function Money({
   value,
   showSign = false,
@@ -58,7 +58,7 @@ export const Money = memo(function Money({
         {sign}
         {formatThousands(Math.abs(rounded)) || '0'}
       </span>
-      <span className={`${s.unit} ml-0.5 font-medium opacity-80`}>₫</span>
+      <span className={`${s.unit} ml-0.5 font-medium opacity-80`}>đ</span>
     </span>
   );
 });

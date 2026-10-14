@@ -148,7 +148,7 @@ export function QuickAddSheet() {
       <Sheet isOpen={isOpen} onOpenChange={setOpen} isLocked={picking} title="Thêm khoản chi mới" size="md">
         <div className="space-y-5">
           <section>
-            <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-muted">Preset</p>
+            <p className="mb-2 text-[13px] font-bold text-muted">Preset</p>
             {presetsLoaded && contextPresets.length === 0 ? (
               <div className="rounded-xl border border-dashed border-border px-4 py-3 text-sm text-muted">
                 Chưa có preset. Tạo preset để thêm khoản chi nhanh hơn.{' '}
@@ -165,11 +165,11 @@ export function QuickAddSheet() {
                     key={p.id}
                     type="button"
                     onClick={() => onPresetPress(p)}
-                    className="flex min-w-[148px] max-w-[200px] shrink-0 flex-col items-start rounded-2xl border border-border bg-surface px-3.5 py-2.5 text-left transition-colors hover:border-foreground/30"
+                    className="flex min-w-[148px] max-w-[200px] shrink-0 flex-col items-start rounded-2xl border border-border bg-surface px-3.5 py-2.5 text-left transition-colors hover:border-accent"
                   >
                     <span className="flex w-full items-center gap-1">
                       <span className="truncate text-sm font-semibold text-foreground">{p.title}</span>
-                      {isFullPreset(p) ? <Zap className="h-3.5 w-3.5 shrink-0 fill-current text-warning" /> : null}
+                      {isFullPreset(p) ? <Zap className="h-3.5 w-3.5 shrink-0 fill-current text-accent" /> : null}
                     </span>
                     <span className="tabular mt-0.5 text-sm text-muted">{formatVND(p.amount)}</span>
                     {p.trip_id ? (

@@ -70,18 +70,15 @@ export function SettlementTab({
           <p className="text-xs text-muted">
             {tripOpen ? "Bấm 'Ghi nhận' để xác nhận nhanh • 'Sửa' để đổi số tiền" : 'Gợi ý tối ưu — chỉ tham khảo'}
           </p>
-          <ul className="space-y-2">
-            {sorted.map((s) => {
-              const mine = s.from === myMemberId || s.to === myMemberId;
+          <ul className="rounded-[18px] border border-border bg-surface px-3.5">
+            {sorted.map((s, i) => {
               return (
                 <li
                   key={`${s.from}-${s.to}`}
-                  className={`flex flex-wrap items-center gap-3 rounded-2xl border bg-surface p-3 shadow-surface ${
-                    mine ? 'border-foreground/25' : 'border-border/70'
-                  }`}
+                  className={`flex flex-wrap items-center gap-3 py-3 ${i < sorted.length - 1 ? 'border-b border-border' : ''}`}
                 >
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-semibold text-foreground">{label(s)}</p>
+                    <p className="truncate text-[15px] font-semibold text-foreground">{label(s)}</p>
                     <Money
                       value={s.amount}
                       size="md"
@@ -109,7 +106,7 @@ export function SettlementTab({
           ) : null}
         </section>
       ) : balances.length > 0 ? (
-        <div className="rounded-2xl border border-border/70 bg-surface p-4 text-center text-sm text-muted shadow-surface">
+        <div className="rounded-[18px] border border-brand-border bg-brand-soft p-4 text-center text-sm font-medium text-money-positive">
           Cả nhóm đã cân bằng — không cần thanh toán thêm.
         </div>
       ) : null}
@@ -129,13 +126,16 @@ export function SettlementTab({
         {payments.length === 0 ? (
           <EmptyState icon={HandCoins} title="Chưa có thanh toán nào" className="py-8" />
         ) : (
-          <ul className="space-y-2">
-            {payments.map((p) => {
+          <ul className="rounded-[18px] border border-border bg-surface px-3.5">
+            {payments.map((p, i) => {
               const canDelete = tripOpen && (isAdmin || p.recorded_by === myUserId);
               return (
-                <li key={p.id} className="flex items-center gap-3 rounded-2xl border border-border/70 bg-surface p-3 shadow-surface">
+                <li
+                  key={p.id}
+                  className={`flex items-center gap-3 py-3 ${i < payments.length - 1 ? 'border-b border-border' : ''}`}
+                >
                   <div className="min-w-0 flex-1">
-                    <p className="flex items-center gap-1.5 truncate text-sm font-semibold text-foreground">
+                    <p className="flex items-center gap-1.5 truncate text-[15px] font-semibold text-foreground">
                       <span className="truncate">{nameOf(p.from_member_id)}</span>
                       <ArrowRight className="h-3.5 w-3.5 shrink-0 text-muted" />
                       <span className="truncate">{nameOf(p.to_member_id)}</span>
@@ -318,7 +318,7 @@ function RecordPaymentSheet({
 
         {from && to && from !== to ? (
           <div className="rounded-xl bg-surface-secondary px-3.5 py-3">
-            <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-muted">Số dư hiện tại</p>
+            <p className="mb-2 text-[13px] font-bold text-muted">Số dư hiện tại</p>
             {[from, to].map((id) => (
               <div key={id} className="flex items-center justify-between py-0.5 text-sm">
                 <span className="truncate text-foreground">{activeMembers.find((m) => m.id === id)?.display_name}</span>

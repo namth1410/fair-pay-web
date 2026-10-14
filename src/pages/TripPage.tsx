@@ -1,70 +1,57 @@
-import { Button, Skeleton } from '@heroui/react';
-import { CircleAlert, FileDown, Info, MapPin } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
-import { Link, useNavigate, useParams, useSearchParams } from 'react-router';
+import { Button } from '@heroui/react';
+import { CircleAlert } from 'lucide-react';
+import { useCallback, useEffect, useMemo } from 'react';
+import { useMatch, useNavigate, useParams, useSearchParams } from 'react-router';
 
-import { HeaderIconButton, PageHeader } from '../components/layout/PageHeader';
-import { BalancesTab, MyBalanceExplanationSheet } from '../components/trip/BalancesTab';
-import { ExpensesTab } from '../components/trip/ExpensesTab';
-import { ExportSheet } from '../components/trip/ExportSheet';
-import { HistoryTab } from '../components/trip/HistoryTab';
-import { ManagementTab } from '../components/trip/ManagementTab';
-import { SettlementTab } from '../components/trip/SettlementTab';
+import { GroupTripsPane } from '../components/group/GroupTripsPane';
+import { ChatLayout } from '../components/layout/ChatLayout';
+import { PageFrame, PageHeader } from '../components/layout/PageHeader';
 import { makeNameLookup } from '../components/trip/tripHelpers';
-import { Money } from '../components/ui/Money';
-import { EmptyState, Pill, SegmentedTabs } from '../components/ui/Primitives';
+import { TripInfo, type TripInfoTab } from '../components/trip/TripInfo';
+import { TripThread } from '../components/trip/TripThread';
+import { EmptyState } from '../components/ui/Primitives';
+import { Bone } from '../components/ui/Skeleton';
+import { useIsWide } from '../hooks/useMediaQuery';
 import type { GroupMember } from '../services/group.service';
-import { useAuthStore } from '../stores/auth.store';
 import { useGroupStore } from '../stores/group.store';
 import { useTripStore } from '../stores/trip.store';
 import { explainMyTripBalance } from '../utils/explainBalance';
 import type { TripExportData } from '../utils/exportHtml';
-import { formatDateVN } from '../utils/format';
 import { showError } from '../utils/toast';
 
-// Hằng rỗng cố định: selector Zustand trả `[]` mới mỗi lần sẽ gây render vô hạn (React #185).
 const NO_MEMBERS: GroupMember[] = [];
+const INFO_TABS: TripInfoTab[] = ['balances', 'settlement', 'history', 'manage'];
 
-type TripTab = 'expenses' | 'balances' | 'settlement' | 'history' | 'manage';
-const TABS: { id: TripTab; label: string }[] = [
-  { id: 'expenses', label: 'Chi phí' },
-  { id: 'balances', label: 'Số dư' },
-  { id: 'settlement', label: 'Quyết toán' },
-  { id: 'history', label: 'Lịch sử' },
-  { id: 'manage', label: 'Quản lý' },
-];
-
+/**
+ * Chuyến đi (giao diện "Hội thoại"). `/trips/:id` = luồng chat; `/trips/:id/info` = Thông tin
+ * chuyến — desktop: panel phải cạnh luồng (cột trái là các chuyến của nhóm); điện thoại: trang riêng.
+ */
 export default function TripPage() {
   const { tripId = '' } = useParams();
   const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
-  const tabParam = searchParams.get('tab') as TripTab | null;
-  const tab: TripTab = TABS.some((t) => t.id === tabParam) ? (tabParam as TripTab) : 'expenses';
+  const [searchParams] = useSearchParams();
+  const infoMatch = useMatch('/trips/:tripId/info');
+  const infoOpen = infoMatch !== null;
+  const wide = useIsWide();
 
   const trip = useTripStore((s) => (s.currentTripId === tripId ? s.currentTrip : null));
   const loadError = useTripStore((s) => s.currentTripId === tripId && s.currentTripLoadError);
-  const isLoadingTrip = useTripStore((s) => s.isLoadingTrip);
   const expenses = useTripStore((s) => s.expenses);
   const payments = useTripStore((s) => s.payments);
   const allMembers = useTripStore((s) => s.allMembers);
   const balances = useTripStore((s) => s.balances);
   const settlements = useTripStore((s) => s.settlements);
-  const auditLogs = useTripStore((s) => s.auditLogs);
-  const isLoadingAudit = useTripStore((s) => s.isLoadingAudit);
+  const currentTripsGroupId = useTripStore((s) => s.currentTripsGroupId);
   const loadTrip = useTripStore((s) => s.loadTrip);
+  const loadTrips = useTripStore((s) => s.loadTrips);
   const loadAuditLogs = useTripStore((s) => s.loadAuditLogs);
   const refreshCurrentTrip = useTripStore((s) => s.refreshCurrentTrip);
 
   const group = useGroupStore((s) => (trip && s.currentGroupId === trip.group_id ? s.currentGroup : null));
   const members = useGroupStore((s) => (trip && s.currentGroupId === trip.group_id ? s.members : NO_MEMBERS));
   const myMemberId = useGroupStore((s) => (trip && s.currentGroupId === trip.group_id ? s.myMemberId : null));
-  const myRole = useGroupStore((s) => (trip && s.currentGroupId === trip.group_id ? s.myRole : null));
   const openGroup = useGroupStore((s) => s.openGroup);
   const loadBalanceSummary = useGroupStore((s) => s.loadBalanceSummary);
-  const myUserId = useAuthStore((s) => s.profile?.id ?? null);
-
-  const [explainOpen, setExplainOpen] = useState(false);
-  const [exportOpen, setExportOpen] = useState(false);
 
   useEffect(() => {
     void loadTrip(tripId).catch((e) => showError(e, 'Không tải được chuyến đi'));
@@ -78,10 +65,13 @@ export default function TripPage() {
     void openGroup(tripGroupId, { quiet: true }).catch(() => {});
   }, [tripGroupId, openGroup]);
 
+  // Desktop: cột trái liệt kê các chuyến của nhóm → nạp nếu đang giữ danh sách nhóm khác.
+  useEffect(() => {
+    if (!wide || !tripGroupId || currentTripsGroupId === tripGroupId) return;
+    void loadTrips(tripGroupId, { quiet: true }).catch(() => {});
+  }, [wide, tripGroupId, currentTripsGroupId, loadTrips]);
+
   const nameOf = useMemo(() => makeNameLookup(allMembers), [allMembers]);
-  const isAdmin = myRole === 'admin';
-  const tripOpen = trip?.status === 'open';
-  const totalSpent = useMemo(() => expenses.reduce((s, e) => s + e.amount, 0), [expenses]);
 
   const explanation = useMemo(() => {
     if (!myMemberId) return null;
@@ -134,7 +124,25 @@ export default function TripPage() {
     settlements,
   });
 
-  const setTab = (t: TripTab) => setSearchParams(t === 'expenses' ? {} : { tab: t }, { replace: true });
+  const tabParam = searchParams.get('tab') as TripInfoTab | null;
+  const infoTab: TripInfoTab = tabParam && INFO_TABS.includes(tabParam) ? tabParam : 'balances';
+
+  const openInfo = useCallback(
+    (tab?: string) => {
+      // Bấm ⓘ khi panel đang mở (không chọn tab cụ thể) → đóng, như nút bật/tắt.
+      if (infoOpen && !tab) {
+        navigate(`/trips/${tripId}`, { replace: true });
+        return;
+      }
+      const qs = tab && tab !== 'balances' ? `?tab=${tab}` : '';
+      navigate(`/trips/${tripId}/info${qs}`, { replace: infoOpen });
+    },
+    [infoOpen, navigate, tripId],
+  );
+  const closeInfo = useCallback(() => navigate(`/trips/${tripId}`, { replace: true }), [navigate, tripId]);
+  const setInfoTab = (tab: TripInfoTab) =>
+    navigate(`/trips/${tripId}/info${tab === 'balances' ? '' : `?tab=${tab}`}`, { replace: true });
+
   const afterMutation = () => {
     void refreshCurrentTrip();
     void loadBalanceSummary();
@@ -142,145 +150,102 @@ export default function TripPage() {
 
   if (loadError) {
     return (
-      <>
-        <PageHeader title="Chuyến đi" back />
+      <PageFrame header={<PageHeader title="Chuyến đi" back />}>
         <EmptyState
           icon={CircleAlert}
           title="Không mở được chuyến đi"
           subtitle="Chuyến đi có thể đã bị xóa hoặc không còn khả dụng."
-          action={<Button onPress={() => navigate('/', { replace: true })}>Về trang chủ</Button>}
+          action={<Button onPress={() => navigate('/', { replace: true })}>Về trang Nhóm</Button>}
         />
-      </>
+      </PageFrame>
     );
   }
 
   if (!trip) {
-    return (
-      <>
-        <PageHeader title="Chuyến đi" back />
-        <div className="space-y-4">
-          <Skeleton className="h-44 rounded-3xl" />
-          <Skeleton className="h-11 rounded-2xl" />
-          {[0, 1, 2].map((i) => (
-            <Skeleton key={i} className="h-[78px] rounded-2xl" />
-          ))}
-        </div>
-      </>
-    );
+    const skeleton = <TripThreadSkeleton />;
+    if (!wide) return skeleton;
+    return <ChatLayout main={skeleton} />;
   }
 
-  const myTotal = explanation?.totalBalance ?? 0;
-  const showMine = !!myMemberId && (explanation?.lines.length ?? 0) > 0;
-  const heroTint =
-    showMine && myTotal > 0
-      ? 'from-[color-mix(in_oklab,var(--money-positive)_14%,var(--surface))]'
-      : showMine && myTotal < 0
-        ? 'from-[color-mix(in_oklab,var(--money-negative)_12%,var(--surface))]'
-        : 'from-surface-secondary';
+  const info = (
+    <TripInfo
+      trip={trip}
+      tab={infoTab}
+      onTabChange={setInfoTab}
+      onBack={`/trips/${trip.id}`}
+      nameOf={nameOf}
+      buildExportData={buildExportData}
+      isPanel={wide}
+      onClose={closeInfo}
+    />
+  );
+  const thread = (
+    <TripThread
+      trip={trip}
+      explanation={explanation}
+      onOpenInfo={openInfo}
+      infoOpen={infoOpen}
+      afterMutation={afterMutation}
+    />
+  );
 
+  if (!wide) return infoOpen ? info : thread;
   return (
-    <>
-      <PageHeader
-        title={trip.name}
-        subtitle={group?.name}
-        back={`/groups/${trip.group_id}`}
-        right={
-          <HeaderIconButton label="Xuất PDF diễn giải" onClick={() => setExportOpen(true)}>
-            <FileDown className="h-5 w-5" />
-          </HeaderIconButton>
-        }
-      />
+    <ChatLayout
+      list={<GroupTripsPane groupId={trip.group_id} activeTripId={trip.id} />}
+      main={thread}
+      aside={infoOpen ? info : undefined}
+      onCloseAside={closeInfo}
+      asideLabel="Thông tin chuyến"
+    />
+  );
+}
 
-      <section
-        className={`relative mb-5 overflow-hidden rounded-3xl border border-border/70 bg-gradient-to-br ${heroTint} to-surface p-5 shadow-surface`}
-      >
-        <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0">
-            {group ? (
-              <Link
-                to={`/groups/${trip.group_id}`}
-                className="flex items-center gap-1 text-xs font-medium text-muted hover:text-foreground"
-              >
-                <MapPin className="h-3.5 w-3.5" />
-                <span className="truncate">{group.name}</span>
-              </Link>
-            ) : null}
-            <p className="mt-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted">Tổng chi</p>
-            <Money value={totalSpent} size="hero" className={isLoadingTrip ? 'opacity-60' : ''} />
-          </div>
-          {!tripOpen ? (
-            <Pill tone="success">
-              Đã hoàn thành{trip.closed_at ? ` · ${formatDateVN(new Date(trip.closed_at))}` : ''}
-            </Pill>
-          ) : null}
+/** Skeleton luồng chuyến đi: header + banner + bong bóng hai phía + ô soạn (khớp app). */
+function TripThreadSkeleton() {
+  const bubbles: { mine: boolean; w: string }[] = [
+    { mine: false, w: '64%' },
+    { mine: true, w: '58%' },
+    { mine: true, w: '50%' },
+    { mine: false, w: '60%' },
+  ];
+  return (
+    <div className="flex h-full min-h-0 flex-col bg-surface" role="progressbar" aria-label="Đang tải chuyến đi" aria-busy="true">
+      <div className="flex h-14 shrink-0 items-center gap-2.5 border-b border-border px-3">
+        <Bone w={40} h={40} r={20} />
+        <div className="flex-1 space-y-2">
+          <Bone w="40%" h={13} />
+          <Bone w="28%" h={10} />
         </div>
-        <p className="mt-1 text-sm text-muted">
-          {expenses.length} khoản · {payments.length} thanh toán · {members.length} người
-        </p>
-        {showMine ? (
-          <div className="mt-4 flex items-center justify-between gap-3 rounded-2xl bg-surface/70 px-4 py-3 backdrop-blur">
-            <span className="text-sm font-medium text-foreground">
-              {myTotal > 0 ? 'Bạn được nợ' : myTotal < 0 ? 'Bạn đang nợ' : 'Bạn đã cân bằng'}
-            </span>
-            <span className="flex items-center gap-1">
-              <Money
-                value={Math.abs(myTotal)}
-                size="lg"
-                tone={myTotal > 0 ? 'success' : myTotal < 0 ? 'danger' : 'muted'}
-              />
-              <button
-                type="button"
-                aria-label="Xem cách tính số dư của bạn"
-                title="Xem cách tính số dư của bạn"
-                onClick={() => setExplainOpen(true)}
-                className="flex h-8 w-8 items-center justify-center rounded-full text-muted hover:bg-surface-secondary hover:text-foreground"
-              >
-                <Info className="h-4 w-4" />
-              </button>
-            </span>
-          </div>
-        ) : null}
-      </section>
-
-      <SegmentedTabs ariaLabel="Mục của chuyến đi" className="mb-4" value={tab} onChange={setTab} tabs={TABS} />
-
-      <div className="fade-up" key={tab}>
-        {tab === 'expenses' ? (
-          <ExpensesTab
-            expenses={expenses}
-            isLoading={isLoadingTrip}
-            tripOpen={tripOpen}
-            tripId={trip.id}
-            nameOf={nameOf}
-            canDelete={isAdmin}
-            onDeleted={afterMutation}
-          />
-        ) : null}
-        {tab === 'balances' ? <BalancesTab balances={balances} myMemberId={myMemberId} /> : null}
-        {tab === 'settlement' ? (
-          <SettlementTab
-            settlements={settlements}
-            payments={payments}
-            balances={balances}
-            activeMembers={members}
-            myMemberId={myMemberId}
-            myUserId={myUserId}
-            isAdmin={isAdmin}
-            tripOpen={tripOpen}
-            nameOf={nameOf}
-          />
-        ) : null}
-        {tab === 'history' ? <HistoryTab logs={auditLogs} isLoading={isLoadingAudit} nameOf={nameOf} /> : null}
-        {tab === 'manage' ? <ManagementTab trip={trip} isAdmin={isAdmin} /> : null}
       </div>
-
-      <MyBalanceExplanationSheet
-        isOpen={explainOpen}
-        onOpenChange={setExplainOpen}
-        tripName={trip.name}
-        explanation={explanation}
-      />
-      <ExportSheet isOpen={exportOpen} onOpenChange={setExportOpen} members={members} buildData={buildExportData} />
-    </>
+      <div className="flex min-h-14 shrink-0 items-center gap-2.5 bg-brand-soft px-4 py-2">
+        <div className="flex-1 space-y-2">
+          <span className="block h-3.5 w-[56%] rounded-md bg-brand-border" />
+          <span className="block h-2.5 w-[74%] rounded bg-brand-border" />
+        </div>
+      </div>
+      <div className="flex min-h-0 w-full flex-1 flex-col justify-end px-3 py-3 sm:px-5">
+        <div className="my-2.5 flex justify-center">
+          <Bone w={112} h={24} r={12} />
+        </div>
+        {bubbles.map((b, i) =>
+          b.mine ? (
+            <div key={i} className="my-1 flex justify-end pl-14">
+              <span className="bone block h-[84px] rounded-[20px] rounded-br-md !bg-primary-soft" style={{ width: b.w }} />
+            </div>
+          ) : (
+            <div key={i} className="my-1 flex items-end gap-2 pr-12">
+              <Bone w={28} h={28} r={14} />
+              <span className="bone block h-[84px] rounded-[20px] rounded-bl-md !bg-bubble-other" style={{ width: b.w }} />
+            </div>
+          ),
+        )}
+      </div>
+      <div className="flex shrink-0 items-center gap-2 border-t border-border px-3 pb-2.5 pt-2.5">
+        <Bone w={44} h={44} r={22} />
+        <span className="bone block h-11 flex-1 rounded-full" />
+        <span className="bone block h-11 w-11 rounded-full !bg-primary-soft" />
+      </div>
+    </div>
   );
 }

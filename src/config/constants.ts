@@ -23,11 +23,10 @@ export const GROUP_NAME_MAX_LENGTH = 100;
 // Trip
 export const TRIP_NAME_MAX_LENGTH = 50;
 
-// Pinned trips (home shortcut)
-export const MAX_PINNED_TRIPS = 2;
+// Chuyến ghim (hàng "story" cuộn ngang ở trang Nhóm). PHẢI khớp limit trong RPC pin_trip
+// (migration 20261014120000_pinned_trips_raise_limit ở repo app) + MAX_PINNED_TRIPS của app.
+export const MAX_PINNED_TRIPS = 20;
 
-// Home — số nhóm tối thiểu để bật chế độ lưới thẻ.
-export const MIN_GROUPS_FOR_CAROUSEL = 3;
 
 // Group avatar (Cloudflare R2 storage)
 export const GROUP_AVATAR_MAX_BYTES = 2 * 1024 * 1024; // 2 MB sau compress

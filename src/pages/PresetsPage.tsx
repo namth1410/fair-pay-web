@@ -1,17 +1,20 @@
-import { Button, Skeleton } from '@heroui/react';
-import { Bookmark, MapPin, Pencil, Plus, Trash2, Zap } from 'lucide-react';
+import { Button } from '@heroui/react';
+import { MapPin, Plus, Trash2, Zap } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router';
 
-import { HeaderIconButton, PageHeader } from '../components/layout/PageHeader';
+import { HeaderIconButton, TabPage } from '../components/layout/LargeTitleHeader';
 import { ConfirmDialog } from '../components/ui/ConfirmDialog';
 import { EmptyState } from '../components/ui/Primitives';
+import { RowsSkeleton } from '../components/ui/Skeleton';
 import { type ExpensePreset, isFullPreset } from '../services/preset.service';
 import { usePresetStore } from '../stores/preset.store';
 import { useTripStore } from '../stores/trip.store';
 import { formatVND } from '../utils/format';
+import { pastelIndex } from '../utils/seedGradient';
 import { showError, showSuccess } from '../utils/toast';
 
+/** Preset khoản chi — danh sách phẳng kiểu app (giao diện "Hội thoại"). */
 export default function PresetsPage() {
   const navigate = useNavigate();
   const presets = usePresetStore((s) => s.presets);
@@ -34,67 +37,67 @@ export default function PresetsPage() {
   }, [allTrips]);
 
   return (
-    <>
-      <PageHeader
-        title="Preset khoản chi"
-        right={
-          <HeaderIconButton label="Thêm preset mới" onClick={() => navigate('/presets/new')}>
-            <Plus className="h-5 w-5" />
-          </HeaderIconButton>
-        }
-      />
-
-      <p className="mb-4 text-sm leading-5 text-muted">
-        Lưu sẵn những khoản chi hay lặp lại (cà phê, gửi xe, tiền phòng…). Preset gắn chuyến đi có đủ người trả và
-        cách chia sẽ tạo khoản chi chỉ với <span className="font-semibold text-foreground">1 chạm</span>.
-      </p>
-
+    <TabPage
+      title="Preset"
+      right={<HeaderIconButton icon={Plus} label="Thêm preset mới" onClick={() => navigate('/presets/new')} />}
+    >
       {loading && !loaded ? (
-        <div className="space-y-2">
-          {[0, 1, 2, 3].map((i) => (
-            <Skeleton key={i} className="h-[76px] rounded-2xl" />
-          ))}
-        </div>
+        <RowsSkeleton count={5} leading="tile" size={52} minHeight={74} />
       ) : presets.length === 0 ? (
         <EmptyState
-          icon={Bookmark}
+          icon={Zap}
           title="Chưa có preset"
-          subtitle="Tạo preset để dùng nhanh khi thêm khoản chi hay lặp lại."
+          subtitle="Lưu sẵn khoản chi hay lặp lại (cà phê, gửi xe…). Preset gắn chuyến có đủ người trả + cách chia tạo khoản chi chỉ với 1 chạm."
           action={
             <Button onPress={() => navigate('/presets/new')}>
-              <Plus className="h-4 w-4" /> Thêm preset
+              <Plus className="h-4 w-4" /> Tạo preset
             </Button>
           }
         />
       ) : (
-        <ul className="space-y-2">
-          {presets.map((p) => (
-            <li key={p.id} className="flex items-center gap-2 rounded-2xl border border-border/70 bg-surface p-2 pl-4 shadow-surface">
-              <button type="button" onClick={() => navigate(`/presets/${p.id}`)} className="min-w-0 flex-1 py-1.5 text-left">
-                <span className="flex items-center gap-2">
-                  <span className="truncate text-[15px] font-semibold text-foreground">{p.title}</span>
-                  {isFullPreset(p) ? (
-                    <span className="inline-flex shrink-0 items-center gap-0.5 rounded-full bg-[color-mix(in_oklab,var(--warning)_18%,transparent)] px-1.5 py-0.5 text-[10px] font-bold uppercase text-[color-mix(in_oklab,var(--warning)_70%,var(--foreground))]">
-                      <Zap className="h-3 w-3 fill-current" /> 1-tap
-                    </span>
-                  ) : null}
-                </span>
-                <span className="tabular block text-sm text-muted">{formatVND(p.amount)}</span>
-                {p.trip_id ? (
-                  <span className="mt-0.5 flex items-center gap-1 text-xs text-muted">
-                    <MapPin className="h-3 w-3 shrink-0" />
-                    <span className="truncate">{tripName(p.trip_id)}</span>
+        <ul aria-label="Preset của bạn">
+          {presets.map((p) => {
+            const full = isFullPreset(p);
+            return (
+              <li key={p.id} className="group relative flex min-h-[74px] items-center transition-colors hover:bg-surface-secondary">
+                <button
+                  type="button"
+                  onClick={() => navigate(`/presets/${p.id}`)}
+                  aria-label={`Sửa preset ${p.title}`}
+                  className="flex min-w-0 flex-1 items-center gap-3 self-stretch pl-4 text-left"
+                >
+                  <span
+                    className={`pastel-${pastelIndex(p.trip_id ?? p.id)} flex h-[52px] w-[52px] shrink-0 items-center justify-center rounded-[18px]`}
+                    style={{ background: 'var(--pastel-bg)', color: 'var(--pastel-fg)' }}
+                  >
+                    {p.trip_id ? <MapPin className="h-[22px] w-[22px]" /> : <Zap className="h-[22px] w-[22px]" />}
                   </span>
-                ) : null}
-              </button>
-              <Button isIconOnly variant="ghost" size="sm" aria-label={`Sửa ${p.title}`} onPress={() => navigate(`/presets/${p.id}`)}>
-                <Pencil className="h-4 w-4" />
-              </Button>
-              <Button isIconOnly variant="ghost" size="sm" aria-label={`Xóa ${p.title}`} onPress={() => setDeleting(p)}>
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </li>
-          ))}
+                  <span className="flex min-w-0 flex-1 flex-col justify-center gap-[3px] self-stretch border-b border-border py-3 pr-14">
+                    <span className="flex items-center gap-2">
+                      <span className="truncate text-base font-bold text-foreground">{p.title}</span>
+                      {full ? (
+                        <span className="inline-flex shrink-0 items-center gap-0.5 rounded-full bg-primary-soft px-2 py-0.5 text-[11px] font-bold text-accent">
+                          <Zap className="h-3 w-3 fill-current" /> 1 chạm
+                        </span>
+                      ) : null}
+                    </span>
+                    <span className="truncate text-[13px] text-muted">
+                      <span className="tabular">{formatVND(p.amount)}</span> · {p.trip_id ? tripName(p.trip_id) : 'Mọi chuyến'}
+                    </span>
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  aria-label={`Xóa preset ${p.title}`}
+                  title="Xóa preset"
+                  onClick={() => setDeleting(p)}
+                  className="absolute right-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full text-muted transition-colors hover:bg-danger-tint hover:text-danger"
+                >
+                  <Trash2 className="h-[18px] w-[18px]" />
+                </button>
+              </li>
+            );
+          })}
         </ul>
       )}
 
@@ -102,7 +105,7 @@ export default function PresetsPage() {
         isOpen={deleting !== null}
         onOpenChange={(o) => !o && setDeleting(null)}
         title="Xóa preset?"
-        description={`Xóa "${deleting?.title ?? ''}" khỏi danh sách preset. Hành động này không hoàn tác.`}
+        description={`Xóa "${deleting?.title ?? ''}" khỏi danh sách preset. Khoản chi đã tạo từ preset không bị ảnh hưởng.`}
         confirmLabel="Xóa"
         pendingLabel="Đang xóa..."
         onConfirm={async () => {
@@ -116,6 +119,6 @@ export default function PresetsPage() {
           }
         }}
       />
-    </>
+    </TabPage>
   );
 }

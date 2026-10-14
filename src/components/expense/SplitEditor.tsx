@@ -1,8 +1,9 @@
-import { Checkbox } from '@heroui/react';
+import { Check } from 'lucide-react';
 import { useMemo } from 'react';
 
 import { formatThousands, parseMoneyInput } from '../../utils/format';
 import { resolveRatio, splitByRatio, splitEqual, type SplitResult } from '../../utils/split';
+import { Avatar } from '../ui/Avatar';
 import { Money } from '../ui/Money';
 import { SegmentedTabs } from '../ui/Primitives';
 
@@ -39,7 +40,10 @@ export function computeSplits(members: SplitMember[], amount: number, s: SplitSt
   }));
 }
 
-/** Mô hình 2 chiều như app: AI tham gia (checkbox) × chia THẾ NÀO (đều / tỷ lệ / tùy chỉnh). */
+/**
+ * Mô hình 2 chiều như app: AI tham gia (bấm avatar để tích/bỏ) × chia THẾ NÀO (đều / tỷ lệ /
+ * tùy chỉnh). Dòng bỏ tích mờ đi và ẩn ô nhập (khớp form khoản chi của app).
+ */
 export function SplitEditor({
   members,
   amount,
@@ -78,7 +82,7 @@ export function SplitEditor({
 
   return (
     <section className="space-y-3">
-      {!hideModeTabs ? <p className="text-sm font-medium text-foreground">Cách chia</p> : null}
+      {!hideModeTabs ? <p className="text-[15px] font-bold text-foreground">Chia thế nào?</p> : null}
       {!hideModeTabs ? <SegmentedTabs
         ariaLabel="Cách chia"
         stretch
@@ -96,7 +100,7 @@ export function SplitEditor({
         <p className="text-xs text-muted">Nhập số tiền cụ thể cho mỗi người</p>
       ) : null}
 
-      <div className="overflow-hidden rounded-2xl border border-border bg-surface">
+      <div className="overflow-hidden rounded-[18px] border border-border bg-surface">
         <div className="flex items-center justify-between border-b border-border px-3.5 py-2.5">
           <span className="text-sm text-muted">
             Chia cho <span className="font-semibold text-foreground">{selectedCount}/{members.length}</span> người
@@ -106,7 +110,7 @@ export function SplitEditor({
             onClick={() =>
               onChange({ ...state, participants: allSelected ? new Set() : new Set(members.map((m) => m.id)) })
             }
-            className="text-xs font-semibold text-foreground hover:underline"
+            className="text-xs font-bold text-accent hover:underline"
           >
             {allSelected ? 'Bỏ chọn' : 'Chọn tất cả'}
           </button>
@@ -115,15 +119,27 @@ export function SplitEditor({
           {members.map((m) => {
             const checked = state.participants.has(m.id);
             return (
-              <li key={m.id} className={`flex items-center gap-3 px-3.5 py-2 transition-opacity ${checked ? '' : 'opacity-50'}`}>
-                <Checkbox isSelected={checked} onChange={() => toggle(m.id)} aria-label={`Chia cho ${m.name}`}>
-                  <Checkbox.Content className="flex min-w-0 flex-1 cursor-pointer items-center gap-3 py-1">
-                    <Checkbox.Control>
-                      <Checkbox.Indicator />
-                    </Checkbox.Control>
-                    <span className="truncate text-sm font-medium text-foreground">{m.name}</span>
-                  </Checkbox.Content>
-                </Checkbox>
+              <li key={m.id} className="flex min-h-[56px] items-center gap-3 px-3.5 py-2">
+                <button
+                  type="button"
+                  role="checkbox"
+                  aria-checked={checked}
+                  aria-label={`Chia cho ${m.name}`}
+                  onClick={() => toggle(m.id)}
+                  className={`flex min-w-0 flex-1 items-center gap-3 text-left transition-opacity ${checked ? '' : 'opacity-45'}`}
+                >
+                  <span className="relative shrink-0">
+                    <Avatar seed={m.id} label={m.name} size={36} />
+                    <span
+                      className={`absolute -bottom-0.5 -right-0.5 flex h-[18px] w-[18px] items-center justify-center rounded-full border-2 border-surface ${
+                        checked ? 'bg-accent text-accent-foreground' : 'bg-surface-tertiary text-transparent'
+                      }`}
+                    >
+                      <Check className="h-2.5 w-2.5" strokeWidth={3.5} />
+                    </span>
+                  </span>
+                  <span className="truncate text-[15px] font-medium text-foreground">{m.name}</span>
+                </button>
                 <span className="flex-1" />
                 {checked && state.mode === 'ratio' ? (
                   <label className="flex items-center gap-1.5">
@@ -135,7 +151,7 @@ export function SplitEditor({
                       onChange={(e) =>
                         onChange({ ...state, ratios: { ...state.ratios, [m.id]: e.target.value.replace(/\D/g, '') } })
                       }
-                      className="tabular h-9 w-12 rounded-lg border border-border bg-field text-center text-sm font-semibold text-foreground outline-none focus:border-foreground/40"
+                      className="tabular h-9 w-12 rounded-lg border border-border bg-field text-center text-sm font-semibold text-foreground outline-none focus:border-accent"
                       aria-label={`Tỷ lệ của ${m.name}`}
                     />
                     <span className="text-xs text-muted">phần</span>
@@ -154,10 +170,10 @@ export function SplitEditor({
                           customAmounts: { ...state.customAmounts, [m.id]: parseMoneyInput(e.target.value).slice(0, 12) },
                         })
                       }
-                      className="tabular h-9 w-28 rounded-lg border border-border bg-field px-2 text-right text-sm font-semibold text-foreground outline-none focus:border-foreground/40"
+                      className="tabular h-9 w-28 rounded-lg border border-border bg-field px-2 text-right text-sm font-semibold text-foreground outline-none focus:border-accent"
                       aria-label={`Số tiền của ${m.name}`}
                     />
-                    <span className="text-xs text-muted">₫</span>
+                    <span className="text-xs text-muted">đ</span>
                   </label>
                 ) : null}
                 {checked && state.mode !== 'custom' ? (
@@ -172,14 +188,14 @@ export function SplitEditor({
             <span className="font-medium text-danger">Chọn ít nhất 1 người</span>
           ) : state.mode === 'custom' ? (
             <span className={customSum === amount ? 'font-medium text-money-positive' : 'font-medium text-money-negative'}>
-              Tổng chia: {formatThousands(customSum) || '0'}₫ / {formatThousands(amount) || '0'}₫
+              Tổng chia: {formatThousands(customSum) || '0'}đ / {formatThousands(amount) || '0'}đ
             </span>
           ) : state.mode === 'equal' ? (
             <span className="text-muted">
-              Chia đều cho {selectedCount} người · làm tròn 1.000₫, người cuối nhận phần dư
+              Chia đều cho {selectedCount} người · làm tròn 1.000đ, người cuối nhận phần dư
             </span>
           ) : (
-            <span className="text-muted">Theo tỷ lệ — làm tròn 1.000₫, người cuối nhận phần dư</span>
+            <span className="text-muted">Theo tỷ lệ — làm tròn 1.000đ, người cuối nhận phần dư</span>
           )}
         </div>
       </div>

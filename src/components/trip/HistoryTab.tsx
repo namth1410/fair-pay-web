@@ -1,4 +1,3 @@
-import { Skeleton } from '@heroui/react';
 import { History } from 'lucide-react';
 import { useMemo } from 'react';
 
@@ -6,6 +5,7 @@ import { type AuditLog, getActionLabel } from '../../services/audit.service';
 import { formatDateSection, formatVND, getVnDayKey } from '../../utils/format';
 import { Avatar } from '../ui/Avatar';
 import { EmptyState } from '../ui/Primitives';
+import { Bone } from '../ui/Skeleton';
 
 function detailOf(log: AuditLog, nameOf: (id: string) => string): string | null {
   const data = (log.action.endsWith('.delete') ? log.before_data : log.after_data) ?? log.after_data ?? log.before_data;
@@ -67,38 +67,45 @@ export function HistoryTab({
 
   if (isLoading && logs.length === 0) {
     return (
-      <div className="space-y-2">
+      <div className="rounded-[18px] border border-border bg-surface px-3.5">
         {[0, 1, 2, 3].map((i) => (
-          <Skeleton key={i} className="h-16 rounded-2xl" />
+          <div key={i} className={`flex items-center gap-3 py-3 ${i < 3 ? 'border-b border-border' : ''}`}>
+            <Bone w={32} h={32} r={16} />
+            <div className="flex-1 space-y-2">
+              <Bone w="62%" h={13} />
+              <Bone w="40%" h={10} />
+            </div>
+          </div>
         ))}
       </div>
     );
   }
   if (logs.length === 0) return <EmptyState icon={History} title="Chưa có lịch sử thay đổi" />;
 
+  // Kiểu app: mỗi ngày 1 tiêu đề nhỏ + 1 thẻ danh sách có đường kẻ giữa các dòng.
   return (
-    <div className="space-y-5">
+    <div className="space-y-4">
       {sections.map(([key, s]) => (
-        <section key={key} className="space-y-2">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted">{s.title}</p>
-          <ol className="relative space-y-2 border-l border-border pl-4">
-            {s.items.map((log) => {
+        <section key={key}>
+          <p className="mb-1.5 text-[13px] font-bold text-muted">{s.title}</p>
+          <ol className="rounded-[18px] border border-border bg-surface px-3.5">
+            {s.items.map((log, i) => {
               const detail = detailOf(log, nameOf);
               return (
-                <li key={log.id} className="relative">
-                  <span className="absolute -left-[21px] top-4 h-2.5 w-2.5 rounded-full border-2 border-background bg-muted" />
-                  <div className="flex items-start gap-3 rounded-2xl border border-border/70 bg-surface p-3 shadow-surface">
-                    <Avatar seed={log.actor_id} label={log.actor_name ?? '?'} size={32} />
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm text-foreground">
-                        <span className="font-semibold">{log.actor_name}</span> — {getActionLabel(log.action)}
-                      </p>
-                      {detail ? <p className="mt-0.5 truncate text-xs text-muted">{detail}</p> : null}
-                    </div>
-                    <span className="tabular shrink-0 text-xs text-muted">
-                      {timeFmt.format(new Date(log.client_created_at ?? log.created_at))}
-                    </span>
+                <li
+                  key={log.id}
+                  className={`flex items-start gap-3 py-3 ${i < s.items.length - 1 ? 'border-b border-border' : ''}`}
+                >
+                  <Avatar seed={log.actor_id} label={log.actor_name ?? '?'} size={32} />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm text-foreground">
+                      <span className="font-semibold">{log.actor_name}</span> — {getActionLabel(log.action)}
+                    </p>
+                    {detail ? <p className="mt-0.5 truncate text-xs text-muted">{detail}</p> : null}
                   </div>
+                  <span className="tabular shrink-0 text-xs text-muted">
+                    {timeFmt.format(new Date(log.client_created_at ?? log.created_at))}
+                  </span>
                 </li>
               );
             })}
